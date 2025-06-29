@@ -1,4 +1,4 @@
-# SAT Solver: Comprehensive Test Plan
+# Comprehensive Test Plan
 
 This repository contains a SAT solver implementation using a custom approach for 3-SAT instances. The program reads input clauses, processes them using sorting, padding, and forbidden vectors, and attempts to generate satisfying assignments.
 
