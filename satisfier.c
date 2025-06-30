@@ -253,7 +253,7 @@ int main(void) {
 
             bool has_any = get_assignments(M, n, forbidden);
             if (!has_any) {
-                printf("Unsatisfiable, no gap or tail of the SAT instance\n");
+                printf("Unsatisfiable, no gap or tail of the SAT instance, or invalid input\n");
                 // cleanup and restart loop
                 for (int i = 0; i < M; i++)
                     free(clause[i].orig);
