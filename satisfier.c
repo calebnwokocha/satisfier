@@ -206,12 +206,12 @@ int main(void) {
         }
 
         if (!early_unsat) {
-            printf("Forbidden matrix (%d clauses):\n", M);
+/*            printf("Forbidden matrix (%d clauses):\n", M);
             for (int i = 0; i < M; i++) {
                 for (int j = 0; j < clause_sizes[i]; j++)
                     printf("%d ", forbidden[i][j]);
                 printf("\n");
-            }
+            }*/
             printf("\n");
             bool ok = get_assignments(M, forbidden, clause_sizes);
             if (!ok)
