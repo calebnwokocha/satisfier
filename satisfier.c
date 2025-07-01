@@ -187,7 +187,7 @@ int main(void) {
         int M;
         Clause *clause = read_clauses(&M);
         if (M == 0) {
-            printf("No clauses read.\n\n");
+            printf("No input\n\n");
             free(clause);
             continue;
         }
@@ -213,9 +213,9 @@ int main(void) {
                 printf("\n");
             }
             printf("\n");*/
-            bool ok = get_assignments(M, forbidden, clause_sizes);
-            if (!ok)
-                printf("Unsatisfiable or no missing assignment\n");
+            bool has_any = get_assignments(M, forbidden, clause_sizes);
+            if (!has_any)
+                printf("Unsatisfiable, no gap or tail of the SAT instance, or invalid input\n");
         }
 
         for (int i = 0; i < M; i++) {
