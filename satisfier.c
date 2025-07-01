@@ -222,6 +222,21 @@ static bool validate_clauses(Clause *clause, int M) {
             return false;
         }
     }
+    // Check for duplicated literals within each clause
+    for (int i = 0; i < M; i++) {
+        for (int j = 0; j < clause[i].sz; j++) {
+            for (int k = j + 1; k < clause[i].sz; k++) {
+                if (clause[i].orig[j] == clause[i].orig[k]) {
+                    printf("Result:\n");
+                    printf("Invalid input, literal %d is duplicated in clause (%d)\n\n", clause[i].orig[j], i + 1);
+                    #pragma omp parallel for
+                    for (int t = 0; t < M; t++) free(clause[t].orig);
+                    free(clause);
+                    return false;
+                }
+            }
+        }
+    }
     return true;
 }
 
@@ -256,7 +271,7 @@ int main(void) {
             }
             printf("\n");*/
             bool has_any = get_assignments(M, forbidden, clause_sizes);
-            if (!has_any) printf("Either there is no head or gap or tail of the SAT instance, or the input is invalid\n");
+            if (!has_any) printf("Unsatisfiable, no head or gap or tail of the SAT instance, or the input is invalid\n");
         }
 
         #pragma omp parallel for
