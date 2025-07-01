@@ -90,6 +90,7 @@ static void process_clause(const Clause *c,
         }
     }
     // Mark forbidden: 1 for negative literal, 0 for positive
+    #pragma omp parallel for
     for (int i = 0; i < row_len; i++)
         out_row[i] = (c->orig[i] < 0) ? 1 : 0;
 }
@@ -100,6 +101,7 @@ static uint64_t forbidden_val(const unsigned char *row, int C) {
     while (s < C && row[s] == 0) s++;
     if (s == C) return 0;
     uint64_t v = 0;
+    #pragma omp parallel for
     for (int j = s; j < C; j++)
         v = (v << 1) | row[j];
     return v;
@@ -109,6 +111,7 @@ static uint64_t forbidden_val(const unsigned char *row, int C) {
 static int partition_serial(uint64_t arr[], int low, int high) {
     uint64_t pivot = arr[high];
     int i = low - 1;
+    #pragma omp parallel for
     for (int j = low; j < high; j++) {
         if (arr[j] <= pivot) {
             i++;
@@ -147,8 +150,22 @@ static bool get_assignments(int M,
     #pragma omp single
     parallel_quick_sort(vals, 0, M - 1);
 
+    // 1) Head: assignments from 0 up to vals[0]-1
     bool any = false;
-    // Scan for gaps between consecutive values
+    if (vals[0] > 0) {
+        any = true;
+        #pragma omp parallel for
+        for (uint64_t v = 0; v < vals[0]; v++) {
+            for (int bb = clause_sizes[0]-1; bb >= 0; bb--) {
+                putchar((v >> bb) & 1 ? '1' : '0');
+                if (bb) putchar(' ');
+            }
+            putchar('\n');
+        }
+    }
+
+    // 2) Gaps between consecutive forbidden values
+    #pragma omp parallel for
     for (int i = 0; i < M - 1; i++) {
         uint64_t a = vals[i], b = vals[i+1];
         if (b > a + 1) {
@@ -162,12 +179,13 @@ static bool get_assignments(int M,
             }
         }
     }
-    // Check after last
+    // 3) Tail: assignments after vals[M-1]
     uint64_t last = vals[M-1];
     int C0 = clause_sizes[0];
     uint64_t maxv = ((uint64_t)1 << C0) - 1;
     if (last < maxv) {
         any = true;
+        #pragma omp parallel for
         for (uint64_t v = last + 1; v <= maxv; v++) {
             for (int bb = C0 -1; bb >= 0; bb--) {
                 putchar((v >> bb) & 1 ? '1' : '0');
@@ -181,16 +199,40 @@ static bool get_assignments(int M,
     return any;
 }
 
+static bool validate_clauses(Clause *clause, int M) {
+    if (M == 0) {
+        printf("Result:\n");
+        printf("No input\n\n");
+        free(clause);
+        return false;
+    }
+    int first_sz = clause[0].sz;
+    for (int i = 1; i < M; i++) {
+        if (clause[i].sz != first_sz) {
+            printf("Result:\n");
+            printf(
+              "Invalid input, clause (1) and clause (%d) have different number of literals\n\n",
+              i + 1
+            );
+            // clean up
+            #pragma omp parallel for
+            for (int j = 0; j < M; j++)
+                free(clause[j].orig);
+            free(clause);
+            return false;
+        }
+    }
+    return true;
+}
+
 int main(void) {
     omp_set_num_threads(omp_get_max_threads());
     while (1) {
         int M;
         Clause *clause = read_clauses(&M);
-        if (M == 0) {
-            printf("No input\n\n");
-            free(clause);
+
+        if (!validate_clauses(clause, M))
             continue;
-        }
 
         unsigned char **forbidden   = malloc(M * sizeof(*forbidden));
         int            *clause_sizes = malloc(M * sizeof(*clause_sizes));
@@ -214,10 +256,10 @@ int main(void) {
             }
             printf("\n");*/
             bool has_any = get_assignments(M, forbidden, clause_sizes);
-            if (!has_any)
-                printf("Unsatisfiable, no gap or tail of the SAT instance, or invalid input\n");
+            if (!has_any) printf("Either there is no head or gap or tail of the SAT instance, or the input is invalid\n");
         }
 
+        #pragma omp parallel for
         for (int i = 0; i < M; i++) {
             free(clause[i].orig);
             free(forbidden[i]);
