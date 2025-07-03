@@ -33,7 +33,7 @@ static ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
     return (ssize_t)len;
 }
 
-static Clause* read_clauses(int *out_M) {
+static Clause* read_clause(int *out_M) {
     Clause *C = NULL;
     int cap = 0, M = 0;
     char *line = NULL;
@@ -250,7 +250,7 @@ int main(void) {
     omp_set_num_threads(omp_get_max_threads());
     while (1) {
         int M;
-        Clause *clause = read_clauses(&M);
+        Clause *clause = read_clause(&M);
 
         if (!I_process_clause(clause, M))
             continue;
