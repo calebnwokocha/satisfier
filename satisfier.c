@@ -66,7 +66,7 @@ static Clause* read_clauses(int *out_M) {
     return C;
 }
 
-static bool I_process_clauses(Clause *clause, int M) {
+static bool I_process_clause(Clause *clause, int M) {
     if (M == 0) {
         printf("Result:\n");
         printf("No input\n\n");
@@ -252,7 +252,7 @@ int main(void) {
         int M;
         Clause *clause = read_clauses(&M);
 
-        if (!I_process_clauses(clause, M))
+        if (!I_process_clause(clause, M))
             continue;
 
         unsigned char **forbidden   = malloc(M * sizeof(*forbidden));
