@@ -1,294 +1,359 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
-#include <stdint.h>
-#include <inttypes.h>
+#include <math.h>
 #include <omp.h>
 
-typedef struct {
-    int *orig;
-    int  sz;
-} Clause;
+// Parallel clause reading with dynamic allocation
+void read_clauses(int ***clauses, int *num_clauses, int *num_vars) {
+    printf("Enter clauses (use a blank line to stop):\n");
+    *num_clauses = 0;
+    *num_vars = 0;
+    char line[1024];
 
-// Portable getline
-static ssize_t getline(char **lineptr, size_t *n, FILE *stream) {
-    if (!lineptr || !n || !stream) return -1;
-    char *buf = *lineptr;
-    size_t cap = *n, len = 0;
-    for (;;) {
-        int ch = fgetc(stream);
-        if (ch == EOF) return len ? (ssize_t)len : -1;
-        if (len + 1 >= cap) {
-            size_t newcap = cap ? cap * 2 : 128;
-            char *tmp = realloc(buf, newcap);
-            if (!tmp) return -1;
-            buf = tmp; cap = newcap;
-        }
-        buf[len++] = ch;
-        if (ch == '\n') break;
-    }
-    buf[len] = '\0';
-    *lineptr = buf; *n = cap;
-    return (ssize_t)len;
-}
+    while (fgets(line, sizeof(line), stdin) && line[0] != '\n') {
+        int *clause = malloc(sizeof(int) * 100);
+        int size = 0;
+        char *token = strtok(line, " ");
 
-static Clause* read_clause(int *out_M) {
-    Clause *C = NULL;
-    int cap = 0, M = 0;
-    char *line = NULL;
-    size_t linecap = 0;
-    ssize_t linelen;
-
-    printf("Enter clause(s) and blank line to finish:\n");
-    while ((linelen = getline(&line, &linecap, stdin)) != -1) {
-        if (linelen == 1 && line[0] == '\n') break;
-        if (M == cap) {
-            cap = cap ? cap * 2 : 4;
-            C = realloc(C, cap * sizeof(Clause));
-        }
-        int *temp = NULL, tcap = 0, tsz = 0;
-        for (char *tok = strtok(line, " \t\n"); tok; tok = strtok(NULL, " \t\n")) {
-            int lit = atoi(tok);
-            if (!lit) continue;
-            if (tsz == tcap) {
-                tcap = tcap ? tcap * 2 : 4;
-                temp = realloc(temp, tcap * sizeof(int));
+        while (token) {
+            int var = atoi(token);
+            if (var != 0) {
+                clause[size++] = var;
+                if (abs(var) > *num_vars) *num_vars = abs(var);
             }
-            temp[tsz++] = lit;
+            token = strtok(NULL, " ");
         }
-        C[M].orig = temp;
-        C[M].sz   = tsz;
-        M++;
+
+        clause[size] = 0;
+        if (size > 0) {
+            *clauses = realloc(*clauses, (*num_clauses + 1) * sizeof(int*));
+            (*clauses)[(*num_clauses)++] = clause;
+        } else free(clause);
     }
-    free(line);
-    *out_M = M;
-    return C;
 }
 
-static bool I_process_clause(Clause *clause, int M) {
-    if (M == 0) {
-        printf("Result:\n");
-        printf("No input\n\n");
-        free(clause);
-        return false;
+// Serial vector printing (printf is not thread-safe for ordered output)
+void print_vector(int *vec, int size) {
+    for (int i = 0; i < size; i++) {
+        printf("%d ", vec[i]);
     }
-    int first_sz = clause[0].sz;
-    for (int i = 1; i < M; i++) {
-        if (clause[i].sz != first_sz) {
-            printf("Result:\n");
-            printf(
-              "Invalid input, clause (1) and clause (%d) have different number of literals\n\n",
-              i + 1
-            );
-            // clean up
-            #pragma omp parallel for
-            for (int j = 0; j < M; j++)
-                free(clause[j].orig);
-            free(clause);
-            return false;
-        }
-    }
-    // Check for duplicated literals within each clause
-    for (int i = 0; i < M; i++) {
-        for (int j = 0; j < clause[i].sz; j++) {
-            for (int k = j + 1; k < clause[i].sz; k++) {
-                if (clause[i].orig[j] == clause[i].orig[k]) {
-                    printf("Result:\n");
-                    printf("Invalid input, literal %d is duplicated in clause (%d)\n\n", clause[i].orig[j], i + 1);
-                    #pragma omp parallel for
-                    for (int t = 0; t < M; t++) free(clause[t].orig);
-                    free(clause);
-                    return false;
-                }
-            }
-        }
-    }
-    return true;
+    printf("\n");
 }
 
-// Process one clause: record forbidden bits per literal position
-static void II_process_clause(const Clause *c,
-                           int row_len,
-                           unsigned char *out_row,
-                           bool *early_unsat_flag,
-                           int clause_idx)
-{
-    if (c->sz < 2) {
-        #pragma omp critical
-        {
-            printf("Invalid input, clause (%d) should have at least two literals\n", clause_idx + 1);
-            *early_unsat_flag = true;
-        }
-        return;
-    }
-
-    // Detect if same var appears both pos and neg in clause
-    // Small local map: since clause small, O(n^2) is fine
-    for (int i = 0; i < c->sz; i++) {
-        for (int j = i + 1; j < c->sz; j++) {
-            if (c->orig[i] + c->orig[j] == 0) {
-                #pragma omp critical
-                {
-                    int v = abs(c->orig[i]);
-                    printf("Tautology, clause (%d) contains both %d and -%d\n",
-                           clause_idx + 1, v, v);
-                    *early_unsat_flag = true;
-                }
-                return;
-            }
-        }
-    }
-    // Mark forbidden: 1 for negative literal, 0 for positive
-    for (int i = 0; i < row_len; i++)
-        out_row[i] = (c->orig[i] < 0) ? 1 : 0;
-}
-
-// Convert a row of length C to a number
-static uint64_t forbidden_val(const unsigned char *row, int C) {
-    int s = 0;
-    while (s < C && row[s] == 0) s++;
-    if (s == C) return 0;
-    uint64_t v = 0;
-    for (int j = s; j < C; j++)
-        v = (v << 1) | row[j];
-    return v;
-}
-
-// Partition for quicksort
-static int partition_serial(uint64_t arr[], int low, int high) {
-    uint64_t pivot = arr[high];
+// Serial partition for quicksort (parallel version would be complex and inefficient)
+int partition(int *arr, int low, int high) {
+    int pivot = arr[high];
     int i = low - 1;
+
     for (int j = low; j < high; j++) {
-        if (arr[j] <= pivot) {
+        if (abs(arr[j]) < abs(pivot)) {
             i++;
-            uint64_t tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+            int temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
         }
     }
-    uint64_t tmp = arr[i+1]; arr[i+1] = arr[high]; arr[high] = tmp;
+
+    int temp = arr[i + 1];
+    arr[i + 1] = arr[high];
+    arr[high] = temp;
     return i + 1;
 }
 
-// Parallel quicksort tasks
-void parallel_quick_sort(uint64_t *arr, int low, int high) {
+// Parallel quicksort
+void quicksort(int *arr, int low, int high) {
     if (low < high) {
-        int p = partition_serial(arr, low, high);
-        #pragma omp task shared(arr)
-        parallel_quick_sort(arr, low, p - 1);
-        #pragma omp task shared(arr)
-        parallel_quick_sort(arr, p + 1, high);
-        #pragma omp taskwait
+        int pivot = partition(arr, low, high);
+        #pragma omp parallel sections
+        {
+            #pragma omp section
+            quicksort(arr, low, pivot - 1);
+            #pragma omp section
+            quicksort(arr, pivot + 1, high);
+        }
     }
 }
 
-// Find missing assignments across all clauses
-static bool get_assignments(int M,
-                            unsigned char **forbidden,
-                            int *clause_sizes)
-{
-    // Map each clause's forbidden row to a numeric value
-    uint64_t *vals = malloc((size_t)M * sizeof *vals);
-    if (!vals) { perror("malloc"); exit(1); }
+// Parallel literal analysis
+void analyze_literals(int **clauses, int num_clauses, int num_vars, int **all_literals, int *literal_count, int **vars_with_both_signs, int *vars_with_both_count) {
+    int *has_pos = calloc(num_vars + 1, sizeof(int));
+    int *has_neg = calloc(num_vars + 1, sizeof(int));
+
+    // Mark which variables have positive and negative literals
+    #pragma omp parallel for
+    for (int i = 0; i < num_clauses; i++) {
+        for (int j = 0; clauses[i][j] != 0; j++) {
+            int literal = clauses[i][j];
+            int var = abs(literal);
+            #pragma omp critical
+            {
+                if (literal > 0) has_pos[var] = 1;
+                else has_neg[var] = 1;
+            }
+        }
+    }
+
+    // Count variables with both positive and negative literals
+    int both_count = 0;
+    for (int i = 1; i <= num_vars; i++) {
+        if (has_pos[i] && has_neg[i]) both_count++;
+    }
+    *vars_with_both_count = both_count;
+
+    if (*vars_with_both_count > 0) {
+        *vars_with_both_signs = malloc(*vars_with_both_count * sizeof(int));
+        int idx = 0;
+        for (int i = 1; i <= num_vars; i++) {
+            if (has_pos[i] && has_neg[i]) (*vars_with_both_signs)[idx++] = i;
+        }
+    }
+
+    // Collect all unique literals
+    int *temp_literals = malloc(sizeof(int) * num_clauses * num_vars * 2);
+    int temp_count = 0;
+
+    for (int i = 0; i < num_clauses; i++) {
+        for (int j = 0; clauses[i][j] != 0; j++) {
+            int literal = clauses[i][j];
+            int found = 0;
+
+            // Check if literal already exists
+            for (int k = 0; k < temp_count; k++) {
+                if (temp_literals[k] == literal) {
+                    found = 1;
+                    break;
+                }
+            }
+
+            if (!found) {
+                temp_literals[temp_count++] = literal;
+            }
+        }
+    }
+
+    *all_literals = malloc(temp_count * sizeof(int));
+    memcpy(*all_literals, temp_literals, temp_count * sizeof(int));
+    *literal_count = temp_count;
+
+    free(temp_literals);
+    free(has_pos);
+    free(has_neg);
+}
+
+// Parallel vector creation for single case
+void create_single_vector(int *all_literals, int literal_count, int **G, int *G_size) {
+    *G_size = literal_count;
+    *G = malloc(*G_size * sizeof(int));
 
     #pragma omp parallel for
-    for (int i = 0; i < M; i++)
-        vals[i] = forbidden_val(forbidden[i], clause_sizes[i]);
-
-    #pragma omp parallel
-    {
-        #pragma omp single nowait
-        parallel_quick_sort(vals, 0, M - 1);
+    for (int i = 0; i < literal_count; i++) {
+        (*G)[i] = all_literals[i];
     }
 
-    // 1) Head: assignments from 0 up to vals[0]-1
-    bool any = false;
-    if (vals[0] > 0) {
-        any = true;
-        for (uint64_t v = 0; v < vals[0]; v++) {
-            for (int bb = clause_sizes[0]-1; bb >= 0; bb--) {
-                putchar((v >> bb) & 1 ? '1' : '0');
-                if (bb) putchar(' ');
-            }
-            putchar('\n');
-        }
-    }
-
-    // 2) Gaps between consecutive forbidden values
-    for (int i = 0; i < M - 1; i++) {
-        uint64_t a = vals[i], b = vals[i+1];
-        if (b > a + 1) {
-            any = true;
-            for (uint64_t v = a + 1; v < b; v++) {
-                for (int bb = clause_sizes[0] - 1; bb >= 0; bb--) {
-                    putchar((v >> bb) & 1 ? '1' : '0');
-                    if (bb) putchar(' ');
-                }
-                putchar('\n');
-            }
-        }
-    }
-    // 3) Tail: assignments after vals[M-1]
-    uint64_t last = vals[M-1];
-    int C0 = clause_sizes[0];
-    uint64_t maxv = ((uint64_t)1 << C0) - 1;
-    if (last < maxv) {
-        any = true;
-        for (uint64_t v = last + 1; v <= maxv; v++) {
-            for (int bb = C0 -1; bb >= 0; bb--) {
-                putchar((v >> bb) & 1 ? '1' : '0');
-                if (bb) putchar(' ');
-            }
-            putchar('\n');
-        }
-    }
-
-    free(vals);
-    return any;
+    quicksort(*G, 0, *G_size - 1);
 }
 
-int main(void) {
-    omp_set_num_threads(omp_get_max_threads());
-    while (1) {
-        int M;
-        Clause *clause = read_clause(&M);
-
-        if (!I_process_clause(clause, M))
-            continue;
-
-        unsigned char **forbidden   = malloc(M * sizeof(*forbidden));
-        int            *clause_sizes = malloc(M * sizeof(*clause_sizes));
-        bool            early_unsat = false;
-
-        printf("Result:\n");
-        #pragma omp parallel for schedule(dynamic)
-        for (int i = 0; i < M; i++) {
-            clause_sizes[i] = clause[i].sz;
-            forbidden[i]    = malloc(clause_sizes[i]);
-            if (!__atomic_load_n(&early_unsat, __ATOMIC_RELAXED))
-                II_process_clause(&clause[i], clause_sizes[i], forbidden[i], &early_unsat, i);
+// Helper function to check if variable has both signs
+int has_both_signs(int var, int *vars_with_both_signs, int vars_with_both_count) {
+    for (int i = 0; i < vars_with_both_count; i++) {
+        if (vars_with_both_signs[i] == var) {
+            return 1;
         }
-
-        if (!early_unsat) {
-           /* printf("Forbidden matrix (%d clauses):\n", M);
-            for (int i = 0; i < M; i++) {
-                for (int j = 0; j < clause_sizes[i]; j++)
-                    printf("%d ", forbidden[i][j]);
-                printf("\n");
-            }
-            printf("\n");*/
-            bool has_any = get_assignments(M, forbidden, clause_sizes);
-            if (!has_any) printf("Unsatisfiable, no head or gap or tail of the SAT instance, or the input is invalid\n");
-        }
-
-        #pragma omp parallel for
-        for (int i = 0; i < M; i++) {
-            free(clause[i].orig);
-            free(forbidden[i]);
-        }
-        free(clause);
-        free(forbidden);
-        free(clause_sizes);
-        printf("\n");
     }
+    return 0;
+}
+
+// Parallel vector creation for dual case
+void create_dual_vectors(int *all_literals, int literal_count, int *vars_with_both_signs, int vars_with_both_count, int **G_pos, int *G_pos_size, int **G_neg, int *G_neg_size) {
+    // First pass: count how many literals go in each vector
+    int pos_count = 0, neg_count = 0;
+
+    for (int i = 0; i < literal_count; i++) {
+        int literal = all_literals[i];
+        int var = abs(literal);
+        int has_both = has_both_signs(var, vars_with_both_signs, vars_with_both_count);
+
+        if ((has_both && literal > 0) || !has_both) {
+            pos_count++;
+        }
+        if ((has_both && literal < 0) || !has_both) {
+            neg_count++;
+        }
+    }
+
+    // Allocate arrays
+    *G_pos = malloc(pos_count * sizeof(int));
+    *G_neg = malloc(neg_count * sizeof(int));
+    *G_pos_size = 0;
+    *G_neg_size = 0;
+
+    // Second pass: fill the arrays
+    for (int i = 0; i < literal_count; i++) {
+        int literal = all_literals[i];
+        int var = abs(literal);
+        int has_both = has_both_signs(var, vars_with_both_signs, vars_with_both_count);
+
+        if ((has_both && literal > 0) || !has_both) {
+            (*G_pos)[(*G_pos_size)++] = literal;
+        }
+        if ((has_both && literal < 0) || !has_both) {
+            (*G_neg)[(*G_neg_size)++] = literal;
+        }
+    }
+
+    // Sort both vectors in parallel
+    #pragma omp parallel sections
+    {
+        #pragma omp section
+        quicksort(*G_pos, 0, *G_pos_size - 1);
+        #pragma omp section
+        quicksort(*G_neg, 0, *G_neg_size - 1);
+    }
+}
+
+// Parallel forbidden vector creation
+void create_forbidden(int *G, int G_size, int **forbidden) {
+    *forbidden = malloc(sizeof(int) * G_size);
+
+    #pragma omp parallel for
+    for (int i = 0; i < G_size; i++) {
+        (*forbidden)[i] = (G[i] < 0) ? 1 : 0;
+    }
+}
+
+// Parallel assignment vector creation
+void create_assignment(int *forbidden, int size, int **assignment) {
+    *assignment = malloc(sizeof(int) * size);
+
+    #pragma omp parallel for
+    for (int i = 0; i < size; i++) {
+        (*assignment)[i] = (forbidden[i] == 0) ? 1 : 0;
+    }
+}
+
+// Parallel memory cleanup
+void cleanup_memory(int **clauses, int num_clauses, int *all_literals, int *vars_with_both_signs, int *G_pos, int *G_neg) {
+    #pragma omp parallel sections
+    {
+        #pragma omp section
+        {
+            if (clauses != NULL) {
+                for (int i = 0; i < num_clauses; i++) {
+                    free(clauses[i]);
+                }
+                free(clauses);
+            }
+        }
+        #pragma omp section
+        if (all_literals != NULL) free(all_literals);
+        #pragma omp section
+        if (vars_with_both_signs != NULL) free(vars_with_both_signs);
+        #pragma omp section
+        if (G_pos != NULL) free(G_pos);
+        #pragma omp section
+        if (G_neg != NULL) free(G_neg);
+    }
+}
+
+// Main parallel processing function
+int main() {
+    omp_set_num_threads(omp_get_max_threads());
+
+    while (1) {
+        int **clauses = NULL;
+        int num_clauses = 0, num_vars = 0;
+
+        read_clauses(&clauses, &num_clauses, &num_vars);
+
+        if (num_clauses == 0) {
+            printf("No clauses entered. Exiting...\n");
+            break;
+        }
+
+        int *all_literals = NULL;
+        int literal_count = 0;
+        int *vars_with_both_signs = NULL;
+        int vars_with_both_count = 0;
+
+        analyze_literals(clauses, num_clauses, num_vars, &all_literals, &literal_count, &vars_with_both_signs, &vars_with_both_count);
+
+        int *G_pos = NULL, *G_neg = NULL;
+        int G_pos_size = 0, G_neg_size = 0;
+
+        if (vars_with_both_count == 0) {
+            create_single_vector(all_literals, literal_count, &G_pos, &G_pos_size);
+
+            printf("Sorted G vector:\n");
+            print_vector(G_pos, G_pos_size);
+
+            int *forbidden, *assignment;
+            create_forbidden(G_pos, G_pos_size, &forbidden);
+            create_assignment(forbidden, G_pos_size, &assignment);
+
+            printf("Assignment Vector:\n");
+            print_vector(assignment, G_pos_size);
+
+            #pragma omp parallel sections
+            {
+                #pragma omp section
+                free(forbidden);
+                #pragma omp section
+                free(assignment);
+            }
+        } else {
+            create_dual_vectors(all_literals, literal_count, vars_with_both_signs, vars_with_both_count, &G_pos, &G_pos_size, &G_neg, &G_neg_size);
+
+            printf("Sorted G_pos vector:\n");
+            print_vector(G_pos, G_pos_size);
+            printf("Sorted G_neg vector:\n");
+            print_vector(G_neg, G_neg_size);
+
+            int *forbidden_pos, *forbidden_neg, *assignment_pos, *assignment_neg;
+
+            #pragma omp parallel sections
+            {
+                #pragma omp section
+                {
+                    create_forbidden(G_pos, G_pos_size, &forbidden_pos);
+                    create_assignment(forbidden_pos, G_pos_size, &assignment_pos);
+                }
+                #pragma omp section
+                {
+                    create_forbidden(G_neg, G_neg_size, &forbidden_neg);
+                    create_assignment(forbidden_neg, G_neg_size, &assignment_neg);
+                }
+            }
+
+            printf("Assignment Vector (Positive):\n");
+            print_vector(assignment_pos, G_pos_size);
+            printf("Assignment Vector (Negative):\n");
+            print_vector(assignment_neg, G_neg_size);
+
+            #pragma omp parallel sections
+            {
+                #pragma omp section
+                free(forbidden_pos);
+                #pragma omp section
+                free(forbidden_neg);
+                #pragma omp section
+                free(assignment_pos);
+                #pragma omp section
+                free(assignment_neg);
+            }
+        }
+
+        cleanup_memory(clauses, num_clauses, all_literals, vars_with_both_signs, G_pos, G_neg);
+
+        char continue_input[10];
+        printf("Do you want to enter more clauses? (y/n): ");
+        fgets(continue_input, sizeof(continue_input), stdin);
+
+        if (continue_input[0] == 'n' || continue_input[0] == 'N') {
+            printf("Exiting...\n");
+            break;
+        }
+    }
+
     return 0;
 }
