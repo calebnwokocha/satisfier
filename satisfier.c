@@ -4,32 +4,127 @@
 #include <math.h>
 #include <omp.h>
 
-// Parallel clause reading with dynamic allocation
+// Cross-platform dynamic line reading function
+char* read_dynamic_line(size_t *capacity) {
+    if (*capacity == 0) {
+        *capacity = 1024;
+    }
+
+    char *line = malloc(*capacity);
+    if (!line) return NULL;
+
+    size_t length = 0;
+    int c;
+
+    while ((c = getchar()) != EOF) {
+        if (c == '\n') {
+            line[length] = '\0';
+            return line;
+        }
+
+        // Expand buffer if needed
+        if (length >= *capacity - 1) {
+            *capacity *= 2;
+            char *new_line = realloc(line, *capacity);
+            if (!new_line) {
+                free(line);
+                return NULL;
+            }
+            line = new_line;
+        }
+
+        line[length++] = c;
+    }
+
+    // Handle EOF
+    if (length == 0) {
+        free(line);
+        return NULL;
+    }
+
+    line[length] = '\0';
+    return line;
+}
+
+// Dynamic clause reading with unlimited capacity
 void read_clauses(int ***clauses, int *num_clauses, int *num_vars) {
-    printf("Enter clauses (use a blank line to stop):\n");
+    printf("Format: each line is one clause with space-separated integers\n");
+    printf("Example: 1 -2 3 (then press Enter)\n");
+    printf("Press Enter on empty line to finish\n");
+
     *num_clauses = 0;
     *num_vars = 0;
-    char line[1024];
 
-    while (fgets(line, sizeof(line), stdin) && line[0] != '\n') {
-        int *clause = malloc(sizeof(int) * 100);
+    // Dynamic clause array capacity
+    size_t clause_capacity = 100;
+    *clauses = malloc(clause_capacity * sizeof(int*));
+    if (!*clauses) {
+        fprintf(stderr, "Memory allocation failed for clause array\n");
+        exit(1);
+    }
+
+    size_t line_capacity = 1024;
+    char *line;
+
+    while ((line = read_dynamic_line(&line_capacity)) != NULL) {
+        // Check for blank line (stop condition)
+        if (strlen(line) == 0) {
+            free(line);
+            break;
+        }
+
+        // Dynamic clause with initial capacity
+        size_t literal_capacity = 50;
+        int *clause = malloc(literal_capacity * sizeof(int));
+        if (!clause) {
+            fprintf(stderr, "Memory allocation failed for clause\n");
+            exit(1);
+        }
+
         int size = 0;
-        char *token = strtok(line, " ");
+        char *token = strtok(line, " \t");
 
         while (token) {
             int var = atoi(token);
+            // Accept any non-zero integer as a literal
             if (var != 0) {
+                // Expand clause if needed
+                if (size >= literal_capacity) {
+                    literal_capacity *= 2;
+                    clause = realloc(clause, literal_capacity * sizeof(int));
+                    if (!clause) {
+                        fprintf(stderr, "Memory allocation failed for clause literals\n");
+                        exit(1);
+                    }
+                }
+
                 clause[size++] = var;
                 if (abs(var) > *num_vars) *num_vars = abs(var);
             }
-            token = strtok(NULL, " ");
+            token = strtok(NULL, " \t");
         }
 
-        clause[size] = 0;
         if (size > 0) {
-            *clauses = realloc(*clauses, (*num_clauses + 1) * sizeof(int*));
+            clause[size] = 0;  // Null terminate for processing
+
+            // Expand clause array if needed
+            if (*num_clauses >= clause_capacity) {
+                clause_capacity *= 2;
+                *clauses = realloc(*clauses, clause_capacity * sizeof(int*));
+                if (!*clauses) {
+                    fprintf(stderr, "Memory allocation failed for clause array\n");
+                    exit(1);
+                }
+            }
+
             (*clauses)[(*num_clauses)++] = clause;
-        } else free(clause);
+            printf("Added clause %d with %d literals\n", *num_clauses, size);
+        } else {
+            free(clause);
+            printf("Empty clause ignored\n");
+        }
+
+        free(line);
     }
 }
 
@@ -75,10 +170,23 @@ void quicksort(int *arr, int low, int high) {
     }
 }
 
-// Parallel literal analysis
+// Parallel literal analysis with dynamic allocation
 void analyze_literals(int **clauses, int num_clauses, int num_vars, int **all_literals, int *literal_count, int **vars_with_both_signs, int *vars_with_both_count) {
+    if (num_vars == 0) {
+        *all_literals = NULL;
+        *literal_count = 0;
+        *vars_with_both_signs = NULL;
+        *vars_with_both_count = 0;
+        return;
+    }
+
     int *has_pos = calloc(num_vars + 1, sizeof(int));
     int *has_neg = calloc(num_vars + 1, sizeof(int));
+
+    if (!has_pos || !has_neg) {
+        fprintf(stderr, "Memory allocation failed for literal tracking\n");
+        exit(1);
+    }
 
     // Mark which variables have positive and negative literals
     #pragma omp parallel for
@@ -103,16 +211,28 @@ void analyze_literals(int **clauses, int num_clauses, int num_vars, int **all_li
 
     if (*vars_with_both_count > 0) {
         *vars_with_both_signs = malloc(*vars_with_both_count * sizeof(int));
+        if (!*vars_with_both_signs) {
+            fprintf(stderr, "Memory allocation failed for vars_with_both_signs\n");
+            exit(1);
+        }
+
         int idx = 0;
         for (int i = 1; i <= num_vars; i++) {
             if (has_pos[i] && has_neg[i]) (*vars_with_both_signs)[idx++] = i;
         }
     }
 
-    // Collect all unique literals
-    int *temp_literals = malloc(sizeof(int) * num_clauses * num_vars * 2);
+    // Estimate initial capacity for literals (2 * num_vars is reasonable upper bound)
+    size_t literal_capacity = (num_vars * 2 > 1000) ? num_vars * 2 : 1000;
+    int *temp_literals = malloc(literal_capacity * sizeof(int));
+    if (!temp_literals) {
+        fprintf(stderr, "Memory allocation failed for temp_literals\n");
+        exit(1);
+    }
+
     int temp_count = 0;
 
+    // Collect all unique literals
     for (int i = 0; i < num_clauses; i++) {
         for (int j = 0; clauses[i][j] != 0; j++) {
             int literal = clauses[i][j];
@@ -127,13 +247,29 @@ void analyze_literals(int **clauses, int num_clauses, int num_vars, int **all_li
             }
 
             if (!found) {
+                // Expand if needed
+                if (temp_count >= literal_capacity) {
+                    literal_capacity *= 2;
+                    temp_literals = realloc(temp_literals, literal_capacity * sizeof(int));
+                    if (!temp_literals) {
+                        fprintf(stderr, "Memory allocation failed expanding temp_literals\n");
+                        exit(1);
+                    }
+                }
                 temp_literals[temp_count++] = literal;
             }
         }
     }
 
     *all_literals = malloc(temp_count * sizeof(int));
-    memcpy(*all_literals, temp_literals, temp_count * sizeof(int));
+    if (!*all_literals && temp_count > 0) {
+        fprintf(stderr, "Memory allocation failed for all_literals\n");
+        exit(1);
+    }
+
+    if (temp_count > 0) {
+        memcpy(*all_literals, temp_literals, temp_count * sizeof(int));
+    }
     *literal_count = temp_count;
 
     free(temp_literals);
@@ -164,8 +300,16 @@ int has_both_signs(int var, int *vars_with_both_signs, int vars_with_both_count)
     return 0;
 }
 
-// Parallel vector creation for dual case
+// Parallel vector creation for dual case with dynamic allocation
 void create_dual_vectors(int *all_literals, int literal_count, int *vars_with_both_signs, int vars_with_both_count, int **G_pos, int *G_pos_size, int **G_neg, int *G_neg_size) {
+    if (literal_count == 0) {
+        *G_pos = NULL;
+        *G_neg = NULL;
+        *G_pos_size = 0;
+        *G_neg_size = 0;
+        return;
+    }
+
     // First pass: count how many literals go in each vector
     int pos_count = 0, neg_count = 0;
 
@@ -185,6 +329,12 @@ void create_dual_vectors(int *all_literals, int literal_count, int *vars_with_bo
     // Allocate arrays
     *G_pos = malloc(pos_count * sizeof(int));
     *G_neg = malloc(neg_count * sizeof(int));
+
+    if ((!*G_pos && pos_count > 0) || (!*G_neg && neg_count > 0)) {
+        fprintf(stderr, "Memory allocation failed for G_pos or G_neg vectors\n");
+        exit(1);
+    }
+
     *G_pos_size = 0;
     *G_neg_size = 0;
 
@@ -206,9 +356,9 @@ void create_dual_vectors(int *all_literals, int literal_count, int *vars_with_bo
     #pragma omp parallel sections
     {
         #pragma omp section
-        quicksort(*G_pos, 0, *G_pos_size - 1);
+        if (*G_pos_size > 1) quicksort(*G_pos, 0, *G_pos_size - 1);
         #pragma omp section
-        quicksort(*G_neg, 0, *G_neg_size - 1);
+        if (*G_neg_size > 1) quicksort(*G_neg, 0, *G_neg_size - 1);
     }
 }
 
@@ -284,14 +434,14 @@ int main() {
         if (vars_with_both_count == 0) {
             create_single_vector(all_literals, literal_count, &G_pos, &G_pos_size);
 
-            printf("Sorted G vector:\n");
+            printf("Sorted G vector: ");
             print_vector(G_pos, G_pos_size);
 
             int *forbidden, *assignment;
             create_forbidden(G_pos, G_pos_size, &forbidden);
             create_assignment(forbidden, G_pos_size, &assignment);
 
-            printf("Assignment Vector:\n");
+            printf("Assignment Vector: ");
             print_vector(assignment, G_pos_size);
 
             #pragma omp parallel sections
@@ -304,9 +454,9 @@ int main() {
         } else {
             create_dual_vectors(all_literals, literal_count, vars_with_both_signs, vars_with_both_count, &G_pos, &G_pos_size, &G_neg, &G_neg_size);
 
-            printf("Sorted G_pos vector:\n");
+            printf("Sorted G_pos vector: ");
             print_vector(G_pos, G_pos_size);
-            printf("Sorted G_neg vector:\n");
+            printf("Sorted G_neg vector: ");
             print_vector(G_neg, G_neg_size);
 
             int *forbidden_pos, *forbidden_neg, *assignment_pos, *assignment_neg;
@@ -325,9 +475,9 @@ int main() {
                 }
             }
 
-            printf("Assignment Vector (Positive):\n");
+            printf("Assignment Vector (Positive): ");
             print_vector(assignment_pos, G_pos_size);
-            printf("Assignment Vector (Negative):\n");
+            printf("Assignment Vector (Negative): ");
             print_vector(assignment_neg, G_neg_size);
 
             #pragma omp parallel sections
