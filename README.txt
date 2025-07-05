@@ -4,83 +4,68 @@
 
 Purpose:
 --------
-Build the Satisfier shared library with Code::Blocks on Windows (DLL) and Linux (.so):
-- Exposes only Logic_new, Logic_delete, Logic_and, Logic_or, Logic_not, Logic_value
-- Single codebase, platform-specific export macros
+Build the Satisfier shared library (DLL on Windows, .so on Linux) exposing only a clean C API plus a C++ chaining wrapper:
+- C++ class `sat::Logic` with methods `.And()`, `.Or()`, `.Not()`, `.value()` for RAII and chaining
 
 Files:
 ------
-* satisfier.hpp
-* satisfier.cpp
-* README.txt  (this file)
+* `satisfier.hpp`  — Public API header
+* `satisfier.cpp`  — Implementation
+* `README.txt`     — This setup guide
 
-Platform-specific Export Macro:
---------------------------------
-Using SATISFIER_API, defined in satisfier.hpp:
-- On Windows: __declspec(dllexport/dllimport)
-- On Linux:   __attribute__((visibility("default"))) when building; else empty
+Export Macro:
+-------------
+`SATISFIER_API` toggles symbol visibility:
+- Windows: `__declspec(dllexport/dllimport)`
+- Linux:   `__attribute__((visibility("default")))` when `BUILD_SATISFIER` is set
 
-Build Instructions:
--------------------
+Build with Code::Blocks (Windows & Linux):
+------------------------------------------
 
-1) Start Code::Blocks
+1. **Create Project**
+   - New → Project → Dynamic Linker Library
+   - Name: `satisfier`, Location: project root
 
-2) Create Project:
-   File → New → Project → Dynamic Linker Library → Go
-   Name: satisfier
-   Folder: project root
-   Compiler: choose appropriate
+2. **Add Sources**
+   - Add `satisfier.hpp` to Headers
+   - Add `satisfier.cpp` to Sources
 
-3) Add files:
-   - Headers → Add satisfier.hpp
-   - Sources → Add satisfier.cpp
+3. **Define BUILD_SATISFIER**
+   - Project → Build options → #defines → add `BUILD_SATISFIER`
 
-4) Set build defines:
-   click Project → Build options…
-   Under “#defines”, add:
-     BUILD_SATISFIER
+4. **Platform Flags**
+   - **Linux** target:
+     - Compiler settings → Other options: `-fPIC`
+     - Linker settings → Other options: `-shared`
+   - **Windows** target: no extra flags
 
-5) Linux target flags:
-   Select Linux build target (or global if only one)
-   - Compiler settings → Other compiler options:
-         -fPIC
-   - Linker settings → Other linker options:
-         -shared
+5. **Build**
+   - Press F9 or Build → Build
+   - Artifacts:
+     - Windows → `satisfier.dll` (+ import lib)
+     - Linux   → `libsatisfier.so`
 
-6) Windows target:
-   No extra flags needed—DLL export macro managed via BUILD_SATISFIER
-
-7) Build:
-   Build → Build or press F9
-   Output:
-   - Windows → satisfier.dll (+ import .lib/.a)
-   - Linux   → libsatisfier.so
-
-8) Test client:
-   Create separate Console Application project
-   In test `main.c`:
-     ```
+6. **Test Client**
+   - Create a Console Application project
+   - Include `satisfier.hpp` in `main.cpp`:
+     ```cpp
      #include "satisfier.hpp"
      #include <stdio.h>
 
-     int main(void) {
-         Logic* t = Logic_new(true);
-         Logic* f = Logic_new(false);
-         Logic* r = Logic_and(t, f);
-         printf("true AND false = %d\n", Logic_value(r));
-         Logic_delete(t);
-         Logic_delete(f);
-         Logic_delete(r);
+     int main() {
+         sat::Logic t(true), f(false);
+         sat::Logic r = t.And(f).Or(t).Not();
+         printf("Result: %s\n", r.value() ? "true" : "false");
          return 0;
      }
      ```
-   In test project's build options:
-   - Add library search path and link with satisfier DLL/.so
+   - In client build options:
+     - Search directories for Compiler → path to header
+     - Linker settings → add import lib or link against `.so`
+     - Copy DLL/so to executable folder or set `PATH`/`LD_LIBRARY_PATH`
 
 Outcome:
 --------
-- Windows: `satisfier.dll` for use in Windows apps
-- Linux:   `libsatisfier.so` for use on Linux
-- Clean, portable C API
-
-=== End of README.txt ===
+- **Windows**: `satisfier.dll` for dynamic linking
+- **Linux**:   `libsatisfier.so` for dynamic linking
+- Universal C API + C++ chaining wrapper in one codebase
