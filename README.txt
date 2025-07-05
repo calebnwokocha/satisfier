@@ -5,49 +5,49 @@
 Purpose:
 --------
 Build the Satisfier shared library (DLL on Windows, .so on Linux) exposing only a clean C API plus a C++ chaining wrapper:
-- C++ class `sat::Logic` with methods `.And()`, `.Or()`, `.Not()`, `.value()` for RAII and chaining
+- C++ class sat::Logic with methods .And(), .Or(), .Not(), .value() for RAII and chaining
 
 Files:
 ------
-* `satisfier.hpp`  — Public API header
-* `satisfier.cpp`  — Implementation
-* `README.txt`     — This setup guide
+* satisfier.hpp  — Public API header
+* satisfier.cpp  — Implementation
+* README.txt     — This setup guide
 
 Export Macro:
 -------------
-`SATISFIER_API` toggles symbol visibility:
-- Windows: `__declspec(dllexport/dllimport)`
-- Linux:   `__attribute__((visibility("default")))` when `BUILD_SATISFIER` is set
+SATISFIER_API toggles symbol visibility:
+- Windows: __declspec(dllexport/dllimport)
+- Linux:   __attribute__((visibility("default"))) when BUILD_SATISFIER is set
 
 Build with Code::Blocks (Windows & Linux):
 ------------------------------------------
 
-1. **Create Project**
+1. Create Project
    - New → Project → Dynamic Linker Library
-   - Name: `satisfier`, Location: project root
+   - Name: satisfier, Location: project root
 
-2. **Add Sources**
-   - Add `satisfier.hpp` to Headers
-   - Add `satisfier.cpp` to Sources
+2. Add Sources
+   - Add satisfier.hpp to Headers
+   - Add satisfier.cpp to Sources
 
-3. **Define BUILD_SATISFIER**
-   - Project → Build options → #defines → add `BUILD_SATISFIER`
+3. Define BUILD_SATISFIER
+   - Project → Build options → #defines → add BUILD_SATISFIER
 
-4. **Platform Flags**
-   - **Linux** target:
-     - Compiler settings → Other options: `-fPIC`
-     - Linker settings → Other options: `-shared`
-   - **Windows** target: no extra flags
+4. Platform Flags
+   - Linux target:
+     - Compiler settings → Other options: -fPIC
+     - Linker settings → Other options: -shared
+   - Windows target: no extra flags
 
-5. **Build**
+5. Build
    - Press F9 or Build → Build
    - Artifacts:
-     - Windows → `satisfier.dll` (+ import lib)
-     - Linux   → `libsatisfier.so`
+     - Windows → satisfier.dll (+ import lib)
+     - Linux   → libsatisfier.so
 
-6. **Test Client**
+6. Test Client
    - Create a Console Application project
-   - Include `satisfier.hpp` in `main.cpp`:
+   - Include satisfier.hpp in main.cpp:
      ```cpp
      #include "satisfier.hpp"
      #include <stdio.h>
@@ -61,11 +61,11 @@ Build with Code::Blocks (Windows & Linux):
      ```
    - In client build options:
      - Search directories for Compiler → path to header
-     - Linker settings → add import lib or link against `.so`
-     - Copy DLL/so to executable folder or set `PATH`/`LD_LIBRARY_PATH`
+     - Linker settings → add import lib or link against .so
+     - Copy DLL/so to executable folder or set PATH/LD_LIBRARY_PATH
 
 Outcome:
 --------
-- **Windows**: `satisfier.dll` for dynamic linking
-- **Linux**:   `libsatisfier.so` for dynamic linking
-- Universal C API + C++ chaining wrapper in one codebase
+- Windows: satisfier.dll for dynamic linking
+- Linux:   libsatisfier.so for dynamic linking
+- Universal C API plus C++ chaining wrapper in one codebase
