@@ -63,9 +63,3 @@ Build with Code::Blocks (Windows & Linux):
      - Search directories for Compiler → path to header
      - Linker settings → add import lib or link against .so
      - Copy DLL/so to executable folder or set PATH/LD_LIBRARY_PATH
-
-Outcome:
---------
-- Windows: satisfier.dll for dynamic linking
-- Linux:   libsatisfier.so for dynamic linking
-- Universal C API plus C++ chaining wrapper in one codebase
