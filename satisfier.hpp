@@ -22,8 +22,8 @@ extern "C" {
     // Opaque forward declaration
     struct Logic;
 
-    // Core C API: creation, deletion, binary AND/OR, unary NOT, and value access
-    SATISFIER_API struct Logic* internal_new_logic(bool initial_value);
+    // Core C API: creation, deletion, binary AND, OR, NOT, and value access
+    SATISFIER_API struct Logic* internal_new_logic(bool initial_value, const char* name);
     SATISFIER_API void          internal_delete_logic(struct Logic* instance);
     SATISFIER_API struct Logic* internal_and(const struct Logic* left,
                                              const struct Logic* right);
@@ -46,12 +46,12 @@ class Logic {
 
     public:
     // construct from bool
-    explicit Logic(bool v)
-      : ptr_( internal_new_logic(v) ) {}
+    Logic(bool value, const char* name)
+      : ptr_( internal_new_logic(value, name)) {}
 
     // copy
-    Logic(const Logic& o)
-      : ptr_( internal_new_logic(o.value()) ) {}
+     Logic(const Logic& o)
+      : ptr_( internal_new_logic(o.value(), nullptr) ) {}
 
     // move
     Logic(Logic&& o) noexcept : ptr_(o.ptr_) { o.ptr_ = nullptr; }
@@ -69,17 +69,17 @@ class Logic {
 
     // two operand AND: prints warning if left is false, then computes both
     Logic And(const Logic& rhs) const {
-        return Logic( internal_and(ptr_, rhs.ptr_) );
+        return Logic( internal_and(ptr_, rhs.ptr_), nullptr);
     }
 
     // two operand OR: conventional OR over both operands
     Logic Or(const Logic& rhs) const {
-        return Logic( internal_or(ptr_, rhs.ptr_) );
+        return Logic( internal_or(ptr_, rhs.ptr_), nullptr);
     }
 
     // unary NOT: uses C API
     Logic Not(const Logic& rhs) const {
-        return Logic( internal_not(ptr_, rhs.ptr_) );
+        return Logic( internal_not(ptr_, rhs.ptr_), nullptr);
     }
 
     // extract boolean value
@@ -87,6 +87,8 @@ class Logic {
         return internal_logic_value(ptr_);
     }
 };
+
+#define DEFINE_LOGIC(var, val) sat::Logic var((val), #var)
 
 } // namespace sat
 #endif // __cplusplus
