@@ -88,7 +88,7 @@ class Logic {
     }
 };
 
-#define DEFINE_LOGIC(var, val) sat::Logic var((val), #var)
+#define DEFINE_VARIABLE(var, val) sat::Logic var((val), #var)
 
 } // namespace sat
 #endif // __cplusplus
