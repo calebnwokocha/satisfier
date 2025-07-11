@@ -1,7 +1,7 @@
 EXPORTS
     internal_and @1
-    internal_delete_logic @2
-    internal_logic_value @3
-    internal_new_logic @4
+    internal_delete_formula @2
+    internal_formula_value @3
+    internal_new_formula @4
     internal_not @5
     internal_or @6
