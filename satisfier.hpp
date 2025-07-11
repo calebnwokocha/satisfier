@@ -24,25 +24,24 @@ extern "C" {
 
     // Core C API: creation, deletion, binary AND, OR, NOT, and value access
     SATISFIER_API struct Formula* internal_new_formula(bool initial_value, const char* name);
-    SATISFIER_API void          internal_delete_formula(struct Formula* instance);
-    SATISFIER_API struct Formula* internal_and(const struct Formula* left,
-                                             const struct Formula* right);
-    SATISFIER_API struct Formula* internal_or (const struct Formula* left,
-                                             const struct Formula* right);
-    SATISFIER_API struct Formula* internal_not(const struct Formula* left,
-                                             const struct Formula* right);
-    SATISFIER_API bool          internal_formula_value(const struct Formula* instance);
+    SATISFIER_API void          internal_delete_formula(Formula* instance);
+    SATISFIER_API struct Formula* internal_and(Formula* left,
+                                             const Formula* right);
+    SATISFIER_API struct Formula* internal_or (Formula* left,
+                                             const Formula* right);
+    SATISFIER_API struct Formula* internal_not(struct Formula* left,
+                                             const Formula* right);
+    SATISFIER_API bool          internal_formula_value(const Formula* instance);
 }
 
 #include <utility>
-
 namespace satisfy {
 
 /// C++ RAII wrapper enabling two operand formula chaining
 class Formula {
     private:
     ::Formula* ptr_;
-    explicit Formula(::Formula* p) : ptr_(p) {}
+    explicit Formula(::Formula* p) noexcept : ptr_(p) {}
 
     public:
     // construct from bool
@@ -69,17 +68,17 @@ class Formula {
 
     // two operand AND: prints warning if left is false, then computes both
     Formula And(const Formula& rhs) const {
-        return Formula( internal_and(ptr_, rhs.ptr_), nullptr);
+        return Formula( internal_and(ptr_, rhs.ptr_));
     }
 
     // two operand OR: conventional OR over both operands
     Formula Or(const Formula& rhs) const {
-        return Formula( internal_or(ptr_, rhs.ptr_), nullptr);
+        return Formula( internal_or(ptr_, rhs.ptr_));
     }
 
     // unary NOT: uses C API
     Formula Not(const Formula& rhs) const {
-        return Formula( internal_not(ptr_, rhs.ptr_), nullptr);
+        return Formula( internal_not(ptr_, rhs.ptr_));
     }
 
     // extract boolean value
@@ -90,7 +89,7 @@ class Formula {
 
 #define suppose_literal(var, val) satisfy::Formula var((val), #var)
 
-} // namespace sat
+} // namespace satisfy
 #endif // __cplusplus
 
 #endif // SATISFIER_HPP
