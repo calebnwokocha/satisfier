@@ -51,12 +51,13 @@ Build with Code::Blocks (Windows & Linux):
      ```cpp
      #include "satisfier.hpp"
      #include <stdio.h>
-
+     
      int main() {
-         sat::Logic t(true), f(false);
-         sat::Logic r = t.And(f).Or(t).Not();
-         printf("Result: %s\n", r.value() ? "true" : "false");
-         return 0;
+      suppose_literal(A, true);
+      suppose_literal(Y, false);
+      satisfy::Formula r = A.And(Y);
+      printf("\nResult: %s\n", r.value() ? "true" : "false");
+      return 0;
      }
      ```
    - In client build options:
