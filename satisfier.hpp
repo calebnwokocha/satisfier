@@ -20,75 +20,75 @@
 #ifdef __cplusplus
 extern "C" {
     // Opaque forward declaration
-    struct Logic;
+    struct Formula;
 
     // Core C API: creation, deletion, binary AND, OR, NOT, and value access
-    SATISFIER_API struct Logic* internal_new_logic(bool initial_value, const char* name);
-    SATISFIER_API void          internal_delete_logic(struct Logic* instance);
-    SATISFIER_API struct Logic* internal_and(const struct Logic* left,
-                                             const struct Logic* right);
-    SATISFIER_API struct Logic* internal_or (const struct Logic* left,
-                                             const struct Logic* right);
-    SATISFIER_API struct Logic* internal_not(const struct Logic* left,
-                                             const struct Logic* right);
-    SATISFIER_API bool          internal_logic_value(const struct Logic* instance);
+    SATISFIER_API struct Formula* internal_new_formula(bool initial_value, const char* name);
+    SATISFIER_API void          internal_delete_formula(struct Formula* instance);
+    SATISFIER_API struct Formula* internal_and(const struct Formula* left,
+                                             const struct Formula* right);
+    SATISFIER_API struct Formula* internal_or (const struct Formula* left,
+                                             const struct Formula* right);
+    SATISFIER_API struct Formula* internal_not(const struct Formula* left,
+                                             const struct Formula* right);
+    SATISFIER_API bool          internal_formula_value(const struct Formula* instance);
 }
 
 #include <utility>
 
-namespace sat {
+namespace satisfy {
 
-/// C++ RAII wrapper enabling two operand logic chaining
-class Logic {
+/// C++ RAII wrapper enabling two operand formula chaining
+class Formula {
     private:
-    ::Logic* ptr_;
-    explicit Logic(::Logic* p) : ptr_(p) {}
+    ::Formula* ptr_;
+    explicit Formula(::Formula* p) : ptr_(p) {}
 
     public:
     // construct from bool
-    Logic(bool value, const char* name)
-      : ptr_( internal_new_logic(value, name)) {}
+    Formula(bool value, const char* name)
+      : ptr_( internal_new_formula(value, name)) {}
 
     // copy
-     Logic(const Logic& o)
-      : ptr_( internal_new_logic(o.value(), nullptr) ) {}
+     Formula(const Formula& o)
+      : ptr_( internal_new_formula(o.value(), nullptr) ) {}
 
     // move
-    Logic(Logic&& o) noexcept : ptr_(o.ptr_) { o.ptr_ = nullptr; }
+    Formula(Formula&& o) noexcept : ptr_(o.ptr_) { o.ptr_ = nullptr; }
 
     // destructor
-    ~Logic() {
-        if (ptr_) internal_delete_logic(ptr_);
+    ~Formula() {
+        if (ptr_) internal_delete_formula(ptr_);
     }
 
     // assignment by copy and swap
-    Logic& operator=(Logic o) noexcept {
+    Formula& operator=(Formula o) noexcept {
         std::swap(ptr_, o.ptr_);
         return *this;
     }
 
     // two operand AND: prints warning if left is false, then computes both
-    Logic And(const Logic& rhs) const {
-        return Logic( internal_and(ptr_, rhs.ptr_), nullptr);
+    Formula And(const Formula& rhs) const {
+        return Formula( internal_and(ptr_, rhs.ptr_), nullptr);
     }
 
     // two operand OR: conventional OR over both operands
-    Logic Or(const Logic& rhs) const {
-        return Logic( internal_or(ptr_, rhs.ptr_), nullptr);
+    Formula Or(const Formula& rhs) const {
+        return Formula( internal_or(ptr_, rhs.ptr_), nullptr);
     }
 
     // unary NOT: uses C API
-    Logic Not(const Logic& rhs) const {
-        return Logic( internal_not(ptr_, rhs.ptr_), nullptr);
+    Formula Not(const Formula& rhs) const {
+        return Formula( internal_not(ptr_, rhs.ptr_), nullptr);
     }
 
     // extract boolean value
     bool value() const {
-        return internal_logic_value(ptr_);
+        return internal_formula_value(ptr_);
     }
 };
 
-#define DEFINE_VARIABLE(var, val) sat::Logic var((val), #var)
+#define suppose_literal(var, val) satisfy::Formula var((val), #var)
 
 } // namespace sat
 #endif // __cplusplus
