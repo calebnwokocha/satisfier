@@ -22,15 +22,12 @@ extern "C" {
     // Opaque forward declaration
     struct Formula;
 
-    // Core C API: creation, deletion, binary AND, OR, NOT, and value access
-    SATISFIER_API struct Formula* internal_new_formula(bool initial_value, const char* name);
+    // Core C API: creation, deletion, AND, OR, NOT, and value access
+    SATISFIER_API Formula* internal_new_formula(bool initial_value, const char* name);
     SATISFIER_API void          internal_delete_formula(Formula* instance);
-    SATISFIER_API struct Formula* internal_and(Formula* left,
-                                             const Formula* right);
-    SATISFIER_API struct Formula* internal_or (Formula* left,
-                                             const Formula* right);
-    SATISFIER_API struct Formula* internal_not(struct Formula* left,
-                                             const Formula* right);
+    SATISFIER_API Formula* internal_and(Formula* left, Formula* right);
+    SATISFIER_API Formula* internal_or (Formula* left, Formula* right);
+    SATISFIER_API Formula* internal_not(Formula* operand);
     SATISFIER_API bool          internal_formula_value(const Formula* instance);
 }
 
@@ -48,22 +45,18 @@ class Formula {
     Formula(bool value, const char* name)
       : ptr_( internal_new_formula(value, name)) {}
 
-    // copy
-     Formula(const Formula& o)
-      : ptr_( internal_new_formula(o.value(), nullptr) ) {}
+    Formula(const Formula&) = delete;
+    Formula& operator=(const Formula&) = delete;
 
-    // move
     Formula(Formula&& o) noexcept : ptr_(o.ptr_) { o.ptr_ = nullptr; }
+    Formula& operator=(Formula&& o) noexcept {
+        std::swap(ptr_, o.ptr_);
+        return *this;
+    }
 
     // destructor
     ~Formula() {
         if (ptr_) internal_delete_formula(ptr_);
-    }
-
-    // assignment by copy and swap
-    Formula& operator=(Formula o) noexcept {
-        std::swap(ptr_, o.ptr_);
-        return *this;
     }
 
     // two operand AND: prints warning if left is false, then computes both
@@ -76,16 +69,20 @@ class Formula {
         return Formula( internal_or(ptr_, rhs.ptr_));
     }
 
-    // unary NOT: uses C API
-    Formula Not(const Formula& rhs) const {
-        return Formula( internal_not(ptr_, rhs.ptr_));
-    }
-
     // extract boolean value
     bool value() const {
         return internal_formula_value(ptr_);
     }
+
+     // allow Not() to access private ptr_
+    friend Formula Not(const Formula& operand);
 };
+
+// unary NOT: free function (not chainable)
+inline Formula Not(const Formula& operand) {
+    Formula temp = Formula( internal_not(operand.ptr_) );
+    return temp;
+}
 
 #define suppose_literal(var, val) satisfy::Formula var((val), #var)
 
