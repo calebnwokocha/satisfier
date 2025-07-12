@@ -1,37 +1,71 @@
-# Satisfier API + Code::Blocks Integration Tutorial
+# 🧩 Satisfier API Integration with Code::Blocks
 
-This tutorial shows how to set up a client project in Code::Blocks to link with the **Satisfier** API provided via:
+A step-by-step tutorial demonstrating how to integrate the Satisfier API (`client.cpp`, `satisfier.hpp`, `satisfier.dll`, `libsatisfier.a`) into a Code::Blocks C++ project, using either dynamic (DLL) or static linking.
 
-- `satisfier.hpp` — Header definitions  
-- `satisfier.dll` — Windows dynamic library (runtime linkage)  
-- `libsatisfier.a` — Static library (for static linking on MinGW/GCC)
+---
 
-Client code example: `client.cpp`
+## 📋 Table of Contents
+
+1. [Prerequisites](#prerequisites)  
+2. [Setup](#setup)  
+   - [🛠 Dynamic Linking (DLL)](#dynamic-linking-dll)  
+   - [🧩 Static Linking (.a)](#static-linking-a)  
+3. [Example `client.cpp`](#example-clientcpp)  
+4. [📊 Comparison](#comparison)  
+5. [Tips & Best Practices](#tips--best-practices)
 
 ---
 
 ## Prerequisites
 
-- **Code::Blocks** (bundled with MinGW on Windows) :contentReference[oaicite:1]{index=1}  
-- Your four files placed in a common directory
+- **Operating System**: Windows with Code::Blocks + MinGW  
+- **Files** required in your project folder:
+  - `client.cpp`
+  - `satisfier.hpp`
+  - `satisfier.dll`
+  - `libsatisfier.a`
 
 ---
 
-## 🛠 Option (A): Using DLL (Dynamic Linking)
+## Setup
 
-1. **Create a new Code::Blocks project**  
-   - *File → New → Project → Console Application → C++*
+### Dynamic Linking (DLL)
 
-2. **Copy files**  
-   - Paste `client.cpp` and `satisfier.hpp` into the project folder.
+1. **Create Console Project**  
+   `File → New → Project → Console Application (C++)`
 
-3. **Link the DLL at runtime**  
-   - Place `satisfier.dll` next to the generated `.exe` after building.
+2. **Add files**  
+   Copy `client.cpp`, `satisfier.hpp` into the project directory.
 
-4. **Configure build options**  
-   - Open *Project → Build options → Linker settings*  
-   - Under **Link libraries**, add the import library (e.g. `libsatisfier.dll.a` or `.lib`) if available; else,
-   - Rely on dynamic loading (e.g., `LoadLibrary`, `GetProcAddress`) in your code.
+3. **Linker Settings**  
+   - *Project → Build options → Linker settings*  
+   - If available, add import library (e.g. `.dll.a` or `.lib`).  
+   - Otherwise, code must use `LoadLibrary()` / `GetProcAddress()` for runtime loading.
 
-5. **Include headers**  
-   - Ensure in *Search directories → Compiler* you have the path to `satisfier.hpp`.
+4. **Search Directories**  
+   - *Compiler → Search directories* → Ensure the directory containing `satisfier.hpp` is included.
+
+5. **Post-build Step**  
+   - Copy `satisfier.dll` next to the compiled `.exe`.
+
+6. **Build & Run**  
+   - Press **F9**—the project dynamically loads the DLL at runtime.
+
+---
+
+### Static Linking (.a)
+
+1. **Create Console Project** (same as above)
+
+2. **Include source** files in project
+
+3. **Project → Build options → Linker settings**  
+   - Add `libsatisfier.a`
+
+4. **Compiler Flags**  
+   - Ensure support for C++11 or newer (e.g. add `-std=c++11`)
+
+5. **Build & Run**  
+   - Produces a self-contained `.exe`, no DLL required at runtime.
+
+---
