@@ -10,9 +10,8 @@ A step-by-step tutorial demonstrating how to integrate the Satisfier API (`clien
 - **Files** required in your project folder:
   - `client.cpp`
   - `satisfier.hpp`
-  - `satisfier.dll`
-  - `libsatisfier.a`
-
+  - `satisfier.dll` - find it in `bin/debug`
+  - `libsatisfier.a` - find it in `bin/debug`
 ---
 
 ## 🏗️ Step-by-Step: Static Linking
