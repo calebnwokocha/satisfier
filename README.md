@@ -4,7 +4,7 @@ Integrate the Satisfier API (`client.cpp`, `satisfier.hpp`, `libsatisfier.a`) in
 
 ---
 
-## ✅ Prerequisites
+## 🛠 Prerequisites
 
 - **Windows** with Code::Blocks + MinGW  
 - Project folder contains:
