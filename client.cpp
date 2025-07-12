@@ -20,12 +20,12 @@ int main() {
    // Output
    std::cout
        << "Socrates is a man:    "
-       << (Socrates_is_man.value()    ? "✔\n" : "✘\n")
+       << (Socrates_is_man.value()    ? "True\n" : "False\n")
        << "All men are mortal:   "
-       << (All_men_are_mortal.value() ? "✔\n" : "✘\n")
+       << (All_men_are_mortal.value() ? "True\n" : "False\n")
        << "Implication holds:    "
-       << (implication.value()              ? "✔\n" : "✘\n")
+       << (implication.value()              ? "True\n" : "False\n")
        << "Socrates is mortal:   "
-       << (Socrates_is_mortal.value() ? "✔\n" : "✘\n");
+       << (Socrates_is_mortal.value() ? "True\n" : "False\n");
    return 0;
 }
