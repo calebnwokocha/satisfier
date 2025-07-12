@@ -1,66 +1,83 @@
-==========================
- Satisfier Library Setup
-==========================
+# Satisfier API – Code::Blocks Tutorial
 
-Purpose:
---------
-Build the Satisfier shared library (DLL on Windows, .so on Linux) exposing only a clean C API plus a C++ chaining wrapper:
-- C++ class sat::Logic with methods .And(), .Or(), .Not(), .value() for RAII and chaining
+This guide walks you through setting up a Code::Blocks project using the Satisfier API.
 
-Files:
-------
-* satisfier.hpp  — Public API header
-* satisfier.cpp  — Implementation
-* README.txt     — This setup guide
+## 📁 Project Files
 
-Export Macro:
--------------
-SATISFIER_API toggles symbol visibility:
-- Windows: __declspec(dllexport/dllimport)
-- Linux:   __attribute__((visibility("default"))) when BUILD_SATISFIER is set
+- `client.cpp` – example client code that calls the Satisfier API.  
+- `satisfier.hpp` – C++ header declaring the API interface.  
+- `satisfier.dll` – Windows dynamic library.  
+- `libsatisfier.a` – Unix/Linux static library.  
 
-Build with Code::Blocks (Windows & Linux):
-------------------------------------------
+## 1. Create a New Code::Blocks Project
 
-1. Create Project
-   - New → Project → Dynamic Linker Library
-   - Name: satisfier, Location: project root
+1. Open *Code::Blocks* → **File** → **New** → **Project**.
+2. Choose **Console Application** → **C++** → click **Go**.
+3. Name it (e.g. `SatisfierTest`) and select a folder.
+4. Use default compiler settings; click **Finish**.
 
-2. Add Sources
-   - Add satisfier.hpp to Headers
-   - Add satisfier.cpp to Sources
+## 2. Add Source & Header
 
-3. Define BUILD_SATISFIER
-   - Project → Build options → #defines → add BUILD_SATISFIER
+- Copy `client.cpp` and `satisfier.hpp` into the project folder.
+- In Code::Blocks, right-click **Sources** → **Add files...** → select `client.cpp`.
+- Repeat under **Headers** → select `satisfier.hpp`.
 
-4. Platform Flags
-   - Linux target:
-     - Compiler settings → Other options: -fPIC
-     - Linker settings → Other options: -shared
-   - Windows target: no extra flags
+## 3. Configure Build Settings
 
-5. Build
-   - Press F9 or Build → Build
-   - Artifacts:
-     - Windows → satisfier.dll (+ import lib)
-     - Linux   → libsatisfier.so
+Right-click project → **Build Options…**  
+Select your target (e.g. Debug/Release or both).
 
-6. Test Client
-   - Create a Console Application project
-   - Include satisfier.hpp in main.cpp:
-     ```cpp
-     #include "satisfier.hpp"
-     #include <stdio.h>
-     
-     int main() {
-      suppose_literal(A, true);
-      suppose_literal(Y, false);
-      satisfy::Formula r = A.And(Y);
-      printf("\nResult: %s\n", r.value() ? "true" : "false");
-      return 0;
-     }
-     ```
-   - In client build options:
-     - Search directories for Compiler → path to header
-     - Linker settings → add import lib or link against .so
-     - Copy DLL/so to executable folder or set PATH/LD_LIBRARY_PATH
+### a) Include Directories
+
+Under **Search directories** → **Compiler**, add the project folder (where `satisfier.hpp` lives).
+
+### b) Linker Setup
+
+Under **Search directories** → **Linker**, add path to:
+
+- `satisfier.dll` (on Windows)  
+- or `libsatisfier.a` (on Linux)
+
+Then go to the **Linker settings** tab and add:
+
+- On **Windows**:  
+  - Library filename: `satisfier`  *(Code::Blocks will find `satisfier.dll`/`.lib`)*  
+- On **Linux**:  
+  - Library filename: `satisfier`  *(will link `libsatisfier.a`)*  
+
+> Tip: Do **not** include `lib` prefix or file extension—just `satisfier`.
+
+### c) Additional Compiler Flags (if needed)
+
+If your API requires specific flags (e.g., `-std=c++11`), add those under **Compiler settings** → **Other options**.
+
+## 4. Provide the `.dll` at Runtime (Windows Only)
+
+Windows needs the DLL beside the `.exe` or in your `PATH`.
+
+- After building, locate your executable in `bin/Debug/` (or `bin/Release/`).
+- Copy `satisfier.dll` into that same folder.
+
+Linux static library `.a` requires no runtime copy.
+
+## 5. Build & Run
+
+Click **Build** → **Build**, then **Build** → **Run**.
+
+If everything is configured correctly, your console should show the output defined in `client.cpp`—e.g., “Connected to Satisfier version 1.0”.
+
+## 6. Troubleshooting
+
+- **Cannot find `satisfier.hpp`**  
+  → Check your **Compiler search directories** include the correct path.
+
+- **Linker errors: undefined references**  
+  → Ensure `-lsatisfier` is added under Linker settings and Search directories link to the right `.a` or `.lib`.
+
+- **Runtime error (Windows): `The program can’t start because satisfier.dll is missing`**  
+  → Copy `satisfier.dll` to the same folder as your `.exe`.
+
+- **Linux: “cannot find -lsatisfier”**  
+  → Confirm `libsatisfier.a` is in a directory listed under Linker search paths (Project → Build Options).
+
+---
