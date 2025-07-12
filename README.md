@@ -1,4 +1,4 @@
-# ⚙️ Satisfier API – Static Linking with Code::Blocks
+# 🧩 Satisfier API – Static Linking with Code::Blocks
 
 Integrate the Satisfier API (`client.cpp`, `satisfier.hpp`, `libsatisfier.a`) into a Code::Blocks C++ Console project using **static linking**.
 
