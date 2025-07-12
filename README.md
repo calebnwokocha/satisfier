@@ -14,7 +14,7 @@ A step-by-step tutorial demonstrating how to integrate the Satisfier API (`clien
   - `libsatisfier.a`—find it in `bin/Debug`
 ---
 
-## 🏗️ Integratioin
+## 🏗️ Integration
 
 1. **Create Console Project**  
    `File → New → Project → Console Application (C++)`
