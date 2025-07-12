@@ -1,39 +1,39 @@
-# 🧩 Satisfier API – Static Linking with Code::Blocks
+# 🧩 Satisfier API Integration with Code::Blocks
 
-Integrate the Satisfier API (`client.cpp`, `satisfier.hpp`, `libsatisfier.a`) into a Code::Blocks C++ Console project using **static linking**.
+A step-by-step tutorial demonstrating how to integrate the Satisfier API (`client.cpp`, `satisfier.hpp`, `satisfier.dll`, `libsatisfier.a`) into a Code::Blocks C++ project, using dynamic (DLL) linking.
 
 ---
 
 ## 🛠 Prerequisites
 
-- **Windows** with Code::Blocks + MinGW  
-- Project folder contains:
+- **Operating System**: Windows with Code::Blocks + MinGW  
+- **Files** required in your project folder:
   - `client.cpp`
   - `satisfier.hpp`
-  - `libsatisfier.a` (static library)
+  - `satisfier.dll`
+  - `libsatisfier.a`
 
 ---
 
 ## 🏗️ Step-by-Step: Static Linking
 
-1. **Create Project**  
-   - `File → New → Project → Console Application (C++)`
+1. **Create Console Project**  
+   `File → New → Project → Console Application (C++)`
 
-2. **Add Your Source**  
-   - Copy `client.cpp` and `satisfier.hpp` into the project directory.
+2. **Add files**  
+   Copy `client.cpp`, `satisfier.hpp` into the project directory.
 
-3. **Configure Compiler Search Path**  
-   - `Settings → Compiler → Global compiler settings → Search directories → Compiler`  
-   - Add path containing `satisfier.hpp` (LearnCpp walkthrough) :contentReference[oaicite:1]{index=1}
+3. **Linker Settings**  
+   - *Project → Build options → Linker settings*  
+   - Add import library `libsatisfier.a`  
 
-4. **Link Static Library**  
-   - Right-click project → **Build options → Linker settings**  
-   - Click **Add** under “Link libraries”, then select `libsatisfier.a` :contentReference[oaicite:2]{index=2}
+5. **Copy .dll**  
+   - Comment code in main function of `client.cpp`
+   - Build your project to compile `.exe`
+   - Copy `satisfier.dll` next to the compiled `.exe`
+   - Uncomment code in main function of `client.cpp`
 
-5. **Enable C++11 Standard**  
-   - `Settings → Compiler → Global compiler settings → Compiler flags` → check `-std=c++11`
-
-6. **Build and Run**  
-   - Press **F9**. The executable will include Satisfier functions statically—no DLL required.
+6. **Build & Run**  
+   - Press **F9**—the project dynamically loads the DLL at runtime.
 
 ---
