@@ -6,10 +6,11 @@ int main() {
    suppose_literal(Socrates_is, true);
    suppose_literal(Socrates_is_man,    false);
    suppose_literal(All_men_are_mortal, false);
-   //suppose_literal(n1, true);
 
    // Encode implication
-   auto implication = Not(Socrates_is.Or(Socrates_is_man)).Or(Not(All_men_are_mortal));
+   auto implication = Not(Socrates_is.Or(Socrates_is_man)).
+                      Or(Not(All_men_are_mortal)).
+                      And(Socrates_is);
 
    // Output
    std::cout
@@ -18,7 +19,7 @@ int main() {
        << "All men are mortal:   "
        << (All_men_are_mortal.value() ? "true\n" : "false\n")
        << "Implication holds:    "
-       << (implication.value()              ? "true\n" : "false\n");
+       << (implication.value()        ? "true\n" : "false\n");
 
    return 0;
 }
