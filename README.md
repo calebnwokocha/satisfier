@@ -27,12 +27,16 @@ A step-by-step tutorial demonstrating how to integrate the Satisfier API (`clien
    - Add import library `libsatisfier.a`  
 
 5. **Copy .dll**  
-   - Comment code in main function of `client.cpp`
+   - Comment erroneous code in main function of `client.cpp`
    - Build your project to compile `.exe`
    - Copy `satisfier.dll` next to the compiled `.exe`
    - Uncomment code in main function of `client.cpp`
 
 6. **Build & Run**  
    - Press **F9**—the project dynamically loads the DLL at runtime.
+
+---
+
+Regarding formal proofs using the context rule described by Kassios [1], Prior noted [2] that A.And(B) is not equivalent to A.Tonk(B). Later, Belnap noted [3] that both A,B are deducible from A.And(B) in synthetic mode of logic that relies on context.
 
 ---
