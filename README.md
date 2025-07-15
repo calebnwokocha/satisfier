@@ -37,7 +37,7 @@ A step-by-step tutorial demonstrating how to integrate the Satisfier API (`clien
 
 ---
 
-Regarding formal proofs using the context rule described by Kassios [1], Prior noted [2] that A.And(B) is not equivalent to A.Tonk(B). Later, Belnap noted [3] that both A,B are deducible from A.And(B) in synthetic mode of logic relying on context.
+Regarding formal proofs using the context rule described by Kassios [[1]], Prior noted [2] that A.And(B) is not equivalent to A.Tonk(B). Later, Belnap noted [3] that both A,B are deducible from A.And(B) in synthetic mode of logic relying on context.
 
 [1]: https://github.com/calebnwokocha/satisfier/blob/main/articles/formal_proof-1.pdf
 [2]: https://github.com/calebnwokocha/satisfier/blob/main/articles/Prior-RunaboutInferenceTicket-1960.pdf
