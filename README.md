@@ -28,8 +28,8 @@ A step-by-step tutorial demonstrating how to integrate the Satisfier API (`clien
 
 5. **Copy .dll**  
    - Comment erroneous code in main function of `client.cpp`
-   - Build your project to compile `.exe`
-   - Copy `satisfier.dll` next to the compiled `.exe`
+   - Build your project to compile `.exe` executable
+   - Copy `satisfier.dll` next to the compiled executable
    - Uncomment code in the main function of `client.cpp`
 
 6. **Build & Run**  
