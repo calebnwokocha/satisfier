@@ -44,5 +44,3 @@ Regarding formal proofs using the context rule described by Kassios [[1]], Prior
 [3]: https://github.com/calebnwokocha/satisfier/blob/main/articles/Belnap-TonkPlonkPlink-1962.pdf
 
 When using Satisfier API to do formal proof, if you have consecutive disjunctions e.g., `A.Or(B).Or(C)` and you supposed only literal `C` is true, then type `C.Or(A).Or(B)` instead of `A.Or(B).Or(C)` to minimize number of recommendations from the API.
-
----
