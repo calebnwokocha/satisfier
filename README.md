@@ -39,10 +39,10 @@ A step-by-step tutorial demonstrating how to integrate the Satisfier API (`clien
 
 ## □ Proofs
 
-Regarding formal proofs using the context rule described by Kassios [[1]], Prior noted [[2]] that `A.And(B)` is not equivalent to `A.Tonk(B)`. Later, Belnap noted [[3]] that both `A,B` are deducible from `A.And(B)` in synthetic mode of logic relying on context.
+Regarding formal proofs using the context rule described by Kassios [[1]], Prior noted [[2]] that `A. And(B)` is not equivalent to `A. Tonk(B)`. Later, Belnap noted [[3]] that both `A,B` are deducible from `A. And(B)` in synthetic mode of logic relying on context.
 
 [1]: https://github.com/calebnwokocha/satisfier/blob/main/articles/formal_proof-1.pdf
 [2]: https://github.com/calebnwokocha/satisfier/blob/main/articles/Prior-RunaboutInferenceTicket-1960.pdf
 [3]: https://github.com/calebnwokocha/satisfier/blob/main/articles/Belnap-TonkPlonkPlink-1962.pdf
 
-When using Satisfier API to do formal proof, if you have consecutive disjunctions e.g., `A.Or(B).Or(C)` and you supposed only literal `C` is true, then type `C.Or(A).Or(B)` instead of `A.Or(B).Or(C)` to minimize number of recommendations from the API.
+When using Satisfier API to do formal proof, if you have consecutive disjunctions e.g., `A. Or(B). Or(C)` and you supposed only literal `C` is true, then type `C. Or(A). Or(B)` instead of `A. Or(B). Or(C)` to minimize number of recommendations from the API.
