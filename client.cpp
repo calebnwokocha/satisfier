@@ -4,9 +4,9 @@
 int main () 
 {
    // Propositions
-   suppose_literal (Socrates_is, true);
-   suppose_literal (Socrates_is_man,    false);
-   suppose_literal (All_men_are_mortal, false);
+   Suppose_literal (Socrates_is, true);
+   Suppose_literal (Socrates_is_man,    false);
+   Suppose_literal (All_men_are_mortal, false);
 
    // Assertion
    auto assertion = Not (Socrates_is. Or (Socrates_is_man)).
