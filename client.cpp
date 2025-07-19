@@ -10,17 +10,17 @@ int main ()
 
    // Assertion
    auto assertion = Not (Socrates_is. Or (Socrates_is_man)).
-                      Or (Not (All_men_are_mortal)).
-                      And (Socrates_is);
+                    Or (Not (All_men_are_mortal)).
+                    And (Socrates_is);
 
    // Output
    std::cout
        << "Socrates is a man:    "
-       << (Socrates_is_man. value()    ? "true\n" : "false\n")
+       << (Socrates_is_man. Value ()    ? "true\n" : "false\n")
        << "All men are mortal:   "
-       << (All_men_are_mortal. value() ? "true\n" : "false\n")
+       << (All_men_are_mortal. Value () ? "true\n" : "false\n")
        << "Assertion holds:    "
-       << (assertion. value()        ? "true\n" : "false\n");
+       << (assertion. Value ()        ? "true\n" : "false\n");
 
    return 0;
 }
