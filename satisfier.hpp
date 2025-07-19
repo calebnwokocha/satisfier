@@ -2,6 +2,7 @@
 #define SATISFIER_HPP
 
 #include <stdbool.h>
+#include <utility>
 
 #if defined(_WIN32) || defined(__CYGWIN__)
   #ifdef BUILD_SATISFIER
@@ -31,8 +32,7 @@ extern "C" {
     SATISFIER_API bool          internal_formula_value(const Formula* instance);
 }
 
-#include <utility>
-namespace satisfy {
+namespace Satisfy {
 
 /// C++ RAII wrapper enabling two operand formula chaining
 class Formula {
@@ -84,7 +84,7 @@ inline Formula Not(const Formula& operand) {
     return temp;
 }
 
-#define Suppose_literal(var, val) satisfy::Formula var((val), #var)
+#define Suppose_literal(var, val) Satisfy::Formula var((val), #var)
 
 } // namespace satisfy
 #endif // __cplusplus
