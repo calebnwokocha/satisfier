@@ -84,7 +84,7 @@ inline Formula Not(const Formula& operand) {
     return temp;
 }
 
-#define suppose_literal(var, val) satisfy::Formula var((val), #var)
+#define Suppose_literal(var, val) satisfy::Formula var((val), #var)
 
 } // namespace satisfy
 #endif // __cplusplus
