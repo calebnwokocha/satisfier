@@ -54,10 +54,10 @@ int main ()
 
    Suppose_literal (The_assertion, assertion. Value ());
    Suppose_literal (is_true, true);
-   Suppose_literal (the_assertion_hold, assertion. Value ());
+   Suppose_literal (the_assertion_holds, assertion. Value ());
 
    auto The_assertion_is_true_when_the_assertion_holds = The_assertion. And (is_true).
-                                                         And (when). And (the_assertion_hold);
+                                                         And (when). And (the_assertion_holds);
 
    // Output
    std::cout
