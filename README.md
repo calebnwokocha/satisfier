@@ -37,7 +37,7 @@ A step-by-step tutorial demonstrating how to integrate the Satisfier API (`clien
 
 ---
 
-## □ Proofs
+## ⬜ Proofs
 
 Regarding formal proofs using the context rule described by Kassios [[1]], Prior noted [[2]] that `A. And(B)` is not equivalent to `A. Tonk(B)`. Later, Belnap noted [[3]] that both `A,B` are deducible from `A. And(B)` in synthetic mode of logic relying on context.
 
