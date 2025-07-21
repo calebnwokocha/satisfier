@@ -41,8 +41,8 @@ int main ()
    Suppose_literal (what_or_which_time, true); // Pronoun
    Suppose_literal (the_time_in_which_something_is_done_or_comes_about, true); // Pronoun
 
-   auto when = Adverb. And(at_what_time. And (how_soon). And(in_what_circumstances).
-               And(at_or_on_which_and_referring_to_a_time_or_circumstance).
+   auto when = Adverb. And (at_what_time. And (how_soon). And (in_what_circumstances).
+               And (at_or_on_which_and_referring_to_a_time_or_circumstance).
                And (at_or_during_which_time). And (at_a_former_and_usually_less_prosperous_time)).
                Or (Conjunction. And (at_or_during_the_time_that). And (after).
                And (at_any_time_that_and_whenever). And (after_which_and_just_then_and_implying_suddenness).
