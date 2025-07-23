@@ -1,8 +1,9 @@
 # 🧩 Satisfier API Integration with Code::Blocks
 
-A step-by-step tutorial demonstrating how to integrate the Satisfier API (`client.cpp`, `satisfier.hpp`, `satisfier.dll`, `libsatisfier.a`) into a Code::Blocks C++ project, using dynamic (DLL) linking. For resources on origin of the word "satisfier", read Harvey M. Friedman `Adventures in Logic for Undergraduates` [[4]], and `The Dynmamics of Decision-Making Styles` Decision Dynamics Europe.  
+A step-by-step tutorial demonstrating how to integrate the Satisfier API (`client.cpp`, `satisfier.hpp`, `satisfier.dll`, `libsatisfier.a`) into a Code::Blocks C++ project, using dynamic (DLL) linking. For resources on origin of the word "satisfier", read Harvey M. Friedman `Adventures in Logic for Undergraduates` [[4]], and `The Dynmamics of Decision-Making Styles` Decision Dynamics Europe [[5]].  
 
 [4]: https://github.com/calebnwokocha/satisfier/blob/main/articles/LogicalConn012610-pydfqy.pdf
+[5: https://github.com/calebnwokocha/satisfier/blob/main/articles/the_dynamics_of_decision-making_styles.pdf
 
 ---
 
@@ -41,7 +42,7 @@ A step-by-step tutorial demonstrating how to integrate the Satisfier API (`clien
 
 ## □ Proofs
 
-Regarding formal proofs using the context rule described by Kassios [[1]], Prior noted [[2]] that `A. And (B)` is not equivalent to `A. Tonk (B)`. Later, Belnap noted [[3]] that both `A,B` are deducible from `A. And (B)` in synthetic mode of logic relying on context.
+Regarding formal proofs using the context rule described by Kassios [[1]], A. N. Prior authored `The Runabout Inference-Ticket` [[2]], saying that `A. And (B)` is not equivalent to `A. Tonk (B)`. Later, Nuel D. Belnap authored `Tonk, Plonk and Plink` [[3]], saying that both `A,B` are deducible from `A. And (B)` in synthetic mode of logic relying on context.
 
 [1]: https://github.com/calebnwokocha/satisfier/blob/main/articles/formal_proof-1.pdf
 [2]: https://github.com/calebnwokocha/satisfier/blob/main/articles/Prior-RunaboutInferenceTicket-1960.pdf
