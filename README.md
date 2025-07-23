@@ -1,6 +1,6 @@
 # 🧩 Satisfier API Integration with Code::Blocks
 
-A step-by-step tutorial demonstrating how to integrate the Satisfier API (`client.cpp`, `satisfier.hpp`, `satisfier.dll`, `libsatisfier.a`) into a Code::Blocks C++ project, using dynamic (DLL) linking. If you are curious about origin of the word "satisfier", then read Harvey M. Friedman lecture `Adventures in Logic for Undergraduates` [[4]] and `The Dynmamics of Decision-Making Styles' Decision Dynamics Europe.  
+A step-by-step tutorial demonstrating how to integrate the Satisfier API (`client.cpp`, `satisfier.hpp`, `satisfier.dll`, `libsatisfier.a`) into a Code::Blocks C++ project, using dynamic (DLL) linking. If you are curious about origin of the word "satisfier", then read Harvey M. Friedman lecture `Adventures in Logic for Undergraduates` [[4]] and `The Dynmamics of Decision-Making Styles` Decision Dynamics Europe.  
 
 [4]: https://github.com/calebnwokocha/satisfier/blob/main/articles/LogicalConn012610-pydfqy.pdf
 
