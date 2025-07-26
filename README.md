@@ -1,4 +1,4 @@
-# 🧩 Using Satisfier in Code::Blocks IDE
+# 🧩 Using Satisfier API in Code::Blocks IDE
 
 A step-by-step tutorial demonstrating how to integrate the Satisfier API (`client.cpp`, `satisfier.hpp`, `satisfier.dll`, `libsatisfier.a`) into a Code::Blocks C++ project, using Dynamic Link Library (DLL). For resources on origin of the word "satisfier", read Harvey M. Friedman [`Adventures in Logic for Undergraduates`], and [`The Dynmamics of Decision-Making Styles`] (Decision Dynamics Europe).  
 
