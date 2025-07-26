@@ -16,7 +16,7 @@ A step-by-step tutorial demonstrating how to integrate the Satisfier API (`clien
   - `satisfier.dll`—find it in `bin/Debug`
   - `libsatisfier.a`—find it in `bin/Debug`
 
-If you are downloading Code::Blocks for the first time, then you don't need this tutorial. Just download `codeblocks-satisfier-nosetup` via https://huggingface.co/caletechnology/codeblocks-satisfier-nosetup/tree/main and open `client.cpp`
+  If you are downloading Code::Blocks for the first time, then you don't need this tutorial. Just download `codeblocks-satisfier-nosetup` via https://huggingface.co/caletechnology/codeblocks-satisfier-nosetup/tree/main and open `client.cpp`
 ---
 
 ## 🏗️ Integration
