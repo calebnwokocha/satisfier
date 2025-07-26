@@ -27,8 +27,10 @@ A step-by-step tutorial demonstrating how to integrate the Satisfier API (`clien
 
 3. **Linker Settings**  
    - *Project → Build options → Linker settings*  
-   - Add import library `libsatisfier.a`  
-
+   - Under *Link libraries* click *Add* to `libsatisfier.a` file
+      ![Dialog Box](img/dialog_box.PNG)
+   - When the above dialog box appear, choose *No*
+   - To debug, link again and choose *Yes* in dialog box
 5. **Copy .dll**  
    - Comment erroneous code in main function of `client.cpp`
    - Build your project to compile `.exe` executable
