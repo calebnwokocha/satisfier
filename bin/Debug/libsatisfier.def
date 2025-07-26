@@ -2,6 +2,9 @@ EXPORTS
     internal_and @1
     internal_delete_formula @2
     internal_formula_value @3
-    internal_new_formula @4
-    internal_not @5
-    internal_or @6
+    internal_implying @4
+    internal_new_formula @5
+    internal_not @6
+    internal_not_implying @7
+    internal_or @8
+    internal_this_holds_if_and_only_if @9
