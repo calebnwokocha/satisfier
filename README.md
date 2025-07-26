@@ -10,12 +10,12 @@ A step-by-step tutorial demonstrating how to integrate the Satisfier API (`clien
 ## 🛠 Prerequisites
 
 - **Operating System**: Windows with Code::Blocks + MinGW
-  - If you are downloading Code::Blocks for the first time, then you don't need this tutorial. Just download `codeblocks-satisfier-nosetup` via https://huggingface.co/caletechnology/codeblocks-satisfier-nosetup/tree/main
 - **Files** required in your project folder:
   - `client.cpp`—find it in `clients`
   - `satisfier.hpp`
   - `satisfier.dll`—find it in `bin/Debug`
   - `libsatisfier.a`—find it in `bin/Debug`
+If you are downloading Code::Blocks for the first time, then you don't need this tutorial. Just download `codeblocks-satisfier-nosetup` via https://huggingface.co/caletechnology/codeblocks-satisfier-nosetup/tree/main and open `client.cpp`
 ---
 
 ## 🏗️ Integration
