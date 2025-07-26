@@ -29,6 +29,9 @@
         SATISFIER_API Formula* internal_and(Formula* left, Formula* right);
         SATISFIER_API Formula* internal_or (Formula* left, Formula* right);
         SATISFIER_API Formula* internal_not(Formula* operand);
+        SATISFIER_API Formula* internal_implying (Formula* left, Formula* right);
+        SATISFIER_API Formula* internal_not_implying (Formula* left, Formula* right);
+        SATISFIER_API Formula* internal_this_holds_if_and_only_if (Formula* left, Formula* right);
         SATISFIER_API bool          internal_formula_value(const Formula* instance);
     }
 
@@ -69,8 +72,20 @@
                 return Formula( internal_or(ptr_, rhs.ptr_));
             }
 
-             // allow Not() to access private ptr_
+            // allow Not() to access private ptr_
             friend Formula Not(const Formula& operand);
+
+            Formula Implying(const Formula& rhs) const {
+                return Formula( internal_implying(ptr_, rhs.ptr_));
+            }
+
+            Formula Not_implying(const Formula& rhs) const {
+                return Formula( internal_not_implying(ptr_, rhs.ptr_));
+            }
+
+            Formula This_holds_if_and_only_if(const Formula& rhs) const {
+                return Formula( internal_this_holds_if_and_only_if(ptr_, rhs.ptr_));
+            }
 
             // extract boolean value
             bool Value() const {
