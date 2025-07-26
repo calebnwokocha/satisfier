@@ -11,7 +11,7 @@ A step-by-step tutorial demonstrating how to integrate the Satisfier API (`clien
 
 - **Operating System**: Windows with Code::Blocks + MinGW  
 - **Files** required in your project folder:
-  - `client.cpp`—find it in `client`
+  - `client.cpp`—find it in `clients`
   - `satisfier.hpp`
   - `satisfier.dll`—find it in `bin/Debug`
   - `libsatisfier.a`—find it in `bin/Debug`
