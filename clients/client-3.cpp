@@ -1,7 +1,7 @@
 #include <iostream>
 #include "satisfier.hpp"
 
-int main ()
+int main (/* implementation-defined */)
 {
    // Propositions
    Suppose_literal (Socrates_is, true);
@@ -50,9 +50,9 @@ int main ()
                And (the_time_or_occasion_at_or_in_which)). Or (Pronoun. And (what_or_which_time).
                And (the_time_in_which_something_is_done_or_comes_about));
 
-   Suppose_literal (The_assertion, assertion. Value (/*truth value*/));
+   Suppose_literal (The_assertion, assertion. Value (/* truth value */));
    Suppose_literal (is_true, true);
-   Suppose_literal (the_assertion_holds, assertion. Value (/*truth value*/));
+   Suppose_literal (the_assertion_holds, assertion. Value (/* truth value */));
 
    auto The_assertion_is_true_when_the_assertion_holds = The_assertion. And (is_true).
                                                          And (when). And (the_assertion_holds);
@@ -63,14 +63,14 @@ int main ()
    // Output
    std::cout
        << "Socrates is a man:    "
-       << (Socrates_is_man. Value (/*truth value*/)    ? "true\n" : "false\n")
+       << (Socrates_is_man. Value (/* truth value */)    ? "true\n" : "false\n")
        << "All men are mortal:   "
-       << (All_men_are_mortal. Value (/*truth value*/) ? "true\n" : "false\n")
+       << (All_men_are_mortal. Value (/* truth value */) ? "true\n" : "false\n")
        << "Assertion holds:    "
-       << (assertion. Value (/*truth value*/)        ? "true\n" : "false\n")
+       << (assertion. Value (/* truth value */)        ? "true\n" : "false\n")
        << "The assertion is true when the assertion holds:    "
-       << (The_assertion_is_true_when_the_assertion_holds. Value (/*truth value*/) ? "true\n" : "false\n")
+       << (The_assertion_is_true_when_the_assertion_holds. Value (/* truth value */) ? "true\n" : "false\n")
        << "Implication modus ponendo ponens holds:    "
-       << (Implication_modus_ponendo_ponens. Value (/*truth value*/) ? "true\n" : "false\n");
+       << (Implication_modus_ponendo_ponens. Value (/* truth value */) ? "true\n" : "false\n");
    return 0;
 }

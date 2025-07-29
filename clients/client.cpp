@@ -1,7 +1,7 @@
 #include <iostream>
 #include "satisfier.hpp"
 
-int main () 
+int main (/* implementation-defined */) 
 {
    // Propositions
    Suppose_literal (Socrates_is, true);
@@ -16,11 +16,11 @@ int main ()
    // Output
    std::cout
        << "Socrates is a man:    "
-       << (Socrates_is_man. Value (/*truth value*/)    ? "true\n" : "false\n")
+       << (Socrates_is_man. Value (/* truth value */)    ? "true\n" : "false\n")
        << "All men are mortal:   "
-       << (All_men_are_mortal. Value (/*truth value*/) ? "true\n" : "false\n")
+       << (All_men_are_mortal. Value (/* truth value */) ? "true\n" : "false\n")
        << "Assertion holds:    "
-       << (assertion. Value (/*truth value*/)        ? "true\n" : "false\n");
+       << (assertion. Value (/* truth value */)        ? "true\n" : "false\n");
 
    return 0;
 }
