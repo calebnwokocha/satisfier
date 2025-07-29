@@ -20,7 +20,7 @@ int main ()
        << "All men are mortal:   "
        << (All_men_are_mortal. Value (/*truth value*/) ? "true\n" : "false\n")
        << "Assertion holds:    "
-       << (assertion. Value ()        ? "true\n" : "false\n");
+       << (assertion. Value (/*truth value*/)        ? "true\n" : "false\n");
 
    return 0;
 }
