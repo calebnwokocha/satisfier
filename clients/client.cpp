@@ -16,9 +16,9 @@ int main ()
    // Output
    std::cout
        << "Socrates is a man:    "
-       << (Socrates_is_man. Value ()    ? "true\n" : "false\n")
+       << (Socrates_is_man. Value (/*truth value*/)    ? "true\n" : "false\n")
        << "All men are mortal:   "
-       << (All_men_are_mortal. Value () ? "true\n" : "false\n")
+       << (All_men_are_mortal. Value (/*truth value*/) ? "true\n" : "false\n")
        << "Assertion holds:    "
        << (assertion. Value ()        ? "true\n" : "false\n");
 
