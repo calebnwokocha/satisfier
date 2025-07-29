@@ -50,9 +50,9 @@ int main ()
                And (the_time_or_occasion_at_or_in_which)). Or (Pronoun. And (what_or_which_time).
                And (the_time_in_which_something_is_done_or_comes_about));
 
-   Suppose_literal (The_assertion, assertion. Value ());
+   Suppose_literal (The_assertion, assertion. Value (/*truth value*/));
    Suppose_literal (is_true, true);
-   Suppose_literal (the_assertion_holds, assertion. Value ());
+   Suppose_literal (the_assertion_holds, assertion. Value (/*truth value*/));
 
    auto The_assertion_is_true_when_the_assertion_holds = The_assertion. And (is_true).
                                                          And (when). And (the_assertion_holds);
