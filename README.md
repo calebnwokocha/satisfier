@@ -16,7 +16,7 @@ A step-by-step tutorial demonstrating how to integrate the Satisfier API (`clien
   - `satisfier.dll`—find it in `bin/Debug`
   - `libsatisfier.a`—find it in `bin/Debug`
 
-  If you are downloading Code::Blocks for the first time, then you don't need this tutorial. Just download and extract `codeblocks-satisfier-nosetup` via https://huggingface.co/caletechnology/codeblocks-satisfier-nosetup/tree/main, then open `client.cpp
+  If you are downloading Code::Blocks for the first time, then you don't need this tutorial. Just download a version of `codeblocks-satisfier-nosetup` via https://huggingface.co/caletechnology/codeblocks-satisfier-nosetup/tree/main
 ---
 
 ## 🏗️ Integration
@@ -53,4 +53,5 @@ Regarding context rule, read Yannis Kassios [`Formal Proof`]. Also read A. N. Pr
 [`Tonk, Plonk and Plink`]: https://github.com/calebnwokocha/satisfier/blob/main/articles/Belnap-TonkPlonkPlink-1962.pdf
 
 When using Satisfier API to do formal proof, if you have consecutive disjunctions e.g., `A. Or (B). Or (C)` and you supposed only literal `C` is true, then type `C. Or (A). Or (B)` instead of `A. Or (B). Or (C)` to minimize number of recommendations from the API.
+
 
