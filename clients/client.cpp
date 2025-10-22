@@ -9,7 +9,7 @@ int main (/* implementation-defined */)
    Suppose_literal (All_men_are_mortal, false);
 
    // Assertion
-   auto assertion = Not (Socrates_is. Or (Socrates_is_man)).
+   Satisfy::Formula assertion = Not (Socrates_is. Or (Socrates_is_man)).
                     Or (Not (All_men_are_mortal)).
                     And (Socrates_is);
 
