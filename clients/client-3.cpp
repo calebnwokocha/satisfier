@@ -9,7 +9,7 @@ int main (/* implementation-defined */)
    Suppose_literal (All_men_are_mortal, true);
 
    // Assertion
-   auto assertion = Socrates_is. Or (Socrates_is_man);
+   Satisfy::Formula assertion = Socrates_is. Or (Socrates_is_man);
 
    Suppose_literal (Adverb, true);
    Suppose_literal (Conjunction, true);
@@ -54,7 +54,7 @@ int main (/* implementation-defined */)
    Suppose_literal (is_true, true);
    Suppose_literal (the_assertion_holds, assertion. Value (/* truth value */));
 
-   auto The_assertion_is_true_when_the_assertion_holds = The_assertion. And (is_true).
+   Satisfy::Formula The_assertion_is_true_when_the_assertion_holds = The_assertion. And (is_true).
                                                          And (when). And (the_assertion_holds);
 
    auto Implication_modus_ponendo_ponens = Not (The_assertion_is_true_when_the_assertion_holds).
